@@ -1,0 +1,77 @@
+## Build results
+bin/
+obj/
+out/
+
+## User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+.vscode/
+
+## Visual Studio Code
+.vscode/
+
+## Rider
+.idea/
+*.sln.iml
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## Logs
+*.log
+logs/
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Environment files
+.env
+.env.*
+
+## Secrets
+secrets.json
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+*.nuspec
+*.psmdcp
+
+## Entity Framework
+Migrations/
+
+## Test Results
+TestResults/
+*.coverage
+*.coveragexml
+
+## Publish output
+wwwroot/dist/
+publish/
+*.publish.xml
+
+## JetBrains Rider temp files
+.idea/
+
+## Others
+*.tmp
+*.bak
+*.swp
+*.scc
+*.cache
+*.pid
+*.pid.lock
+
+## Swagger auto-generated files
+swagger/
