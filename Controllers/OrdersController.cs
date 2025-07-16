@@ -86,27 +86,43 @@ namespace AkilliMikroERP.Controllers
             if (existingOrder == null)
                 return NotFound($"Order with id {id} not found.");
 
-            // Önce var olan itemları kaldır (Entity Framework üzerinden)
-            _context.OrderItems.RemoveRange(existingOrder.Items);
+            var existingItems = existingOrder.Items.ToList();
+            var newItemsDto = orderUpdateDto.Items;
 
-            // Yeni itemları oluştur ve ekle
-            var newItems = orderUpdateDto.Items.Select(itemDto =>
+            var itemsToRemove = existingItems
+                .Where(ei => !newItemsDto.Any(ni => ni.ProductId == ei.ProductId))
+                .ToList();
+
+            _context.OrderItems.RemoveRange(itemsToRemove);
+
+            foreach (var existingItem in existingItems)
             {
-                var orderItem = _mapper.Map<OrderItem>(itemDto);
-                orderItem.OrderId = existingOrder.Id;
-                orderItem.TotalPrice = orderItem.Quantity * orderItem.UnitPrice;
-                return orderItem;
-            }).ToList();
+                var updatedItemDto = newItemsDto.FirstOrDefault(ni => ni.ProductId == existingItem.ProductId);
+                if (updatedItemDto != null)
+                {
+                    existingItem.Quantity = updatedItemDto.Quantity;
+                    existingItem.UnitPrice = updatedItemDto.UnitPrice;
+                    existingItem.TotalPrice = updatedItemDto.Quantity * updatedItemDto.UnitPrice;
+                }
+            }
 
-            existingOrder.Items = newItems;
+            var itemsToAdd = newItemsDto
+                .Where(ni => !existingItems.Any(ei => ei.ProductId == ni.ProductId))
+                .ToList();
 
-            // Diğer alanları güncelle
+            foreach (var newItemDto in itemsToAdd)
+            {
+                var newItem = _mapper.Map<OrderItem>(newItemDto);
+                newItem.OrderId = existingOrder.Id;
+                newItem.TotalPrice = newItem.Quantity * newItem.UnitPrice;
+
+                _context.OrderItems.Add(newItem);
+            }
+
             existingOrder.Status = orderUpdateDto.Status;
             existingOrder.PaymentStatus = orderUpdateDto.PaymentStatus;
             existingOrder.DeliveryDate = orderUpdateDto.DeliveryDate?.ToUniversalTime();
             existingOrder.UpdatedAt = DateTimeOffset.UtcNow;
-
-            // Burada Update çağırmana gerek yok, zaten tracked entity güncelleniyor.
 
             try
             {
