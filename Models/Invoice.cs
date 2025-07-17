@@ -12,8 +12,8 @@ namespace AkilliMikroERP.Models
         public string? InvoiceNumber { get; set; }
         public decimal TotalAmount { get; set; }
 
-        public DateTime IssuedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? DueDate { get; set; }
+        public DateTimeOffset IssuedAt { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset? DueDate { get; set; }
 
         public string Status { get; set; } = "ödenmedi";
 
