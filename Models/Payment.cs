@@ -11,7 +11,7 @@ public class Payment
     public Invoice? Invoice { get; set; }
 
     public decimal Amount { get; set; }
-    public DateTime? PaymentDate { get; set; }
+    public DateTimeOffset? PaymentDate { get; set; }
     public string Method { get; set; } = "nakit";
 }
 }

@@ -32,7 +32,8 @@ namespace AkilliMikroERP.Data
             modelBuilder.Entity<Invoice>()
                 .HasMany(i => i.Items)
                 .WithOne(ii => ii.Invoice)
-                .HasForeignKey(ii => ii.InvoiceId);
+                .HasForeignKey(ii => ii.InvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<InvoiceItem>()
                 .HasOne(ii => ii.Product)
@@ -43,6 +44,7 @@ namespace AkilliMikroERP.Data
                 .HasOne(p => p.Invoice)
                 .WithMany(i => i.Payments)
                 .HasForeignKey(p => p.InvoiceId);
+
         }
     }
 }

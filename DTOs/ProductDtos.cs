@@ -14,4 +14,14 @@ namespace AkilliMikroERP.Dtos
         public string? PhotoUrl { get; set; }
     }
 
+    public class ProductUpdateDto : ProductCreateDto
+    {
+        public Guid Id { get; set; }
+    }
+        public class ProductDto
+    {
+        public Guid Id { get; set; }
+        public string? Name { get; set; }
+        public CategoryDto? Category { get; set; }
+    }
 }
