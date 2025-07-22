@@ -37,6 +37,10 @@ namespace AkilliMikroERP.Profiles
             CreateMap<InvoiceItem, InvoiceItemReadDto>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : null))
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Quantity * src.UnitPrice));
+
+            // Customer -> CustomerDetailWithOrdersDto
+            CreateMap<Customer, CustomerDetailWithOrdersDto>()
+                .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src.Orders));
         }
     }
 }
