@@ -10,6 +10,8 @@ out/
 *.sln.docstates
 .vscode/
 
+
+
 ## Visual Studio Code
 .vscode/
 
@@ -32,6 +34,8 @@ Thumbs.db
 project.lock.json
 project.fragment.lock.json
 artifacts/
+
+gemini-access.json
 
 ## Environment files
 .env

@@ -51,13 +51,26 @@ namespace AkilliMikroERP.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var product = await _context.Products.Include(p => p.Category)
+            var product = await _context.Products
+                .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null) return NotFound();
 
-            return Ok(product);
+            var result = new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Category = new CategoryDto
+                {
+                    Id = product.Category.Id, 
+                    Name = product.Category.Name
+                }
+            };
+
+            return Ok(result);
         }
+
 
         // POST api/products
         [HttpPost]

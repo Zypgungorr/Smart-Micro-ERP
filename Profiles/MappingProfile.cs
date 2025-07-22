@@ -8,14 +8,12 @@ namespace AkilliMikroERP.Profiles
     {
         public MappingProfile()
         {
-            // Create DTO -> Entity
+            // Order mappings
             CreateMap<OrderCreateDto, Order>();
-            CreateMap<OrderItemCreateDto, OrderItem>();
-
-            // Update DTO -> Entity
             CreateMap<OrderUpdateDto, Order>();
 
-            // Entity -> Read DTO
+            CreateMap<OrderItemCreateDto, OrderItem>();
+
             CreateMap<Order, OrderReadDto>()
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.Name : null))
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
@@ -23,11 +21,21 @@ namespace AkilliMikroERP.Profiles
             CreateMap<OrderItem, OrderItemReadDto>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : null))
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Quantity * src.UnitPrice));
-            CreateMap<OrderItemCreateDto, OrderItem>();
-            CreateMap<OrderCreateDto, Order>();
-            CreateMap<Order, OrderReadDto>();
-            CreateMap<OrderItem, OrderItemReadDto>();
 
+            // Invoice mappings
+            CreateMap<InvoiceCreateDto, Invoice>()
+                .ForMember(dest => dest.InvoiceDate, opt => opt.MapFrom(_ => DateTimeOffset.UtcNow))
+                .ForMember(dest => dest.Items, opt => opt.Ignore()); // manual
+
+            CreateMap<InvoiceItemCreateDto, InvoiceItem>()
+                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Quantity * src.UnitPrice));
+
+            CreateMap<Invoice, InvoiceReadDto>()
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+
+            CreateMap<InvoiceItem, InvoiceItemReadDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : null))
+                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Quantity * src.UnitPrice));
         }
     }
 }
