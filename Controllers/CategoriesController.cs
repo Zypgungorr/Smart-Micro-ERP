@@ -3,6 +3,7 @@ using AkilliMikroERP.Dtos;
 using AkilliMikroERP.Models;
 using AkilliMikroERP.Services;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ namespace AkilliMikroERP.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
+    [AllowAnonymous]
     public class CategoriesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

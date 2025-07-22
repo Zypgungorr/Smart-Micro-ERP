@@ -274,5 +274,115 @@ namespace AkilliMikroERP.Services
                 remainingRequestsThisMinute = Math.Max(0, _maxRequestsPerMinute - _requestCount)
             };
         }
+
+        public async Task<decimal> GetSuggestedPrice(string productName, string category, decimal purchasePrice = 0)
+        {
+            try
+            {
+                var prompt = $@"
+                Sen bir fiyatlandırma uzmanısın. Aşağıdaki ürün için Türkiye pazarında uygun bir satış fiyatı öner:
+
+                Ürün Adı: {productName}
+                Kategori: {category}
+                Alış Fiyatı: {purchasePrice:C} (eğer 0 ise, kategori ortalamasına göre tahmin et)
+
+                Kurallar:
+                1. Sadece sayısal değer döndür (TL sembolü olmadan)
+                2. Türkiye pazarına uygun fiyatlandırma yap
+                3. Kategori ve ürün özelliklerine göre kar marjı belirle
+                4. Rekabetçi ama karlı bir fiyat öner
+                5. Sadece sayı döndür, açıklama yapma
+
+                Örnek çıktı: 125.50";
+
+                var response = await AskGemini(prompt, "gemini-1.5-flash", "price_suggestion");
+                
+                // Sadece sayısal değeri çıkar
+                var numericValue = ExtractNumericValue(response);
+                
+                return numericValue > 0 ? numericValue : purchasePrice * 1.3m; // Fallback: %30 kar marjı
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fiyat önerisi hatası: {ex.Message}");
+                return purchasePrice > 0 ? purchasePrice * 1.3m : 100m; // Fallback değer
+            }
+        }
+
+        private decimal ExtractNumericValue(string text)
+        {
+            try
+            {
+                // Sayısal değerleri bul
+                var numbers = System.Text.RegularExpressions.Regex.Matches(text, @"\d+[.,]?\d*")
+                    .Cast<System.Text.RegularExpressions.Match>()
+                    .Select(m => m.Value)
+                    .ToList();
+
+                if (numbers.Any())
+                {
+                    // İlk sayıyı al ve decimal'e çevir
+                    var firstNumber = numbers.First().Replace(',', '.');
+                    if (decimal.TryParse(firstNumber, out decimal result))
+                    {
+                        return result;
+                    }
+                }
+
+                return 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public async Task<int> GetEstimatedStockOutDays(string productName, string category, int currentStock, int monthlySales = 0)
+        {
+            try
+            {
+                var prompt = $@"
+                Sen bir stok yönetimi uzmanısın. Aşağıdaki ürün için tahmini stok bitimi gününü hesapla:
+
+                Ürün Adı: {productName}
+                Kategori: {category}
+                Mevcut Stok: {currentStock} adet
+                Aylık Satış: {monthlySales} adet (eğer 0 ise kategori ortalamasına göre tahmin et)
+
+                Kurallar:
+                1. Sadece gün sayısı döndür (sayı olarak)
+                2. Kategori ve ürün özelliklerine göre satış hızını analiz et
+                3. Mevsimsellik faktörlerini dikkate al
+                4. Türkiye pazarı koşullarını göz önünde bulundur
+                5. Sadece sayı döndür, açıklama yapma
+
+                Örnek çıktı: 45";
+
+                var response = await AskGemini(prompt, "gemini-1.5-flash", "stock_prediction");
+                
+                // Sadece sayısal değeri çıkar
+                var numericValue = ExtractNumericValue(response);
+                
+                return (int)numericValue > 0 ? (int)numericValue : CalculateFallbackDays(currentStock, monthlySales);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Stok tahmin hatası: {ex.Message}");
+                return CalculateFallbackDays(currentStock, monthlySales);
+            }
+        }
+
+        private int CalculateFallbackDays(int currentStock, int monthlySales)
+        {
+            if (monthlySales > 0)
+            {
+                // Aylık satış varsa günlük ortalamaya göre hesapla
+                var dailySales = monthlySales / 30.0;
+                return dailySales > 0 ? (int)(currentStock / dailySales) : 90;
+            }
+            
+            // Kategori bazlı varsayılan değerler
+            return currentStock > 0 ? Math.Min(currentStock * 2, 90) : 90; // Maksimum 90 gün
+        }
     }
 }

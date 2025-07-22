@@ -37,6 +37,7 @@ namespace AkilliMikroERP.Dtos
     public class OrderReadDto
     {
         public Guid Id { get; set; }
+        public string OrderNumber { get; set; } = string.Empty;
         public Guid CustomerId { get; set; }
         public string? CustomerName { get; set; }
         public string? Status { get; set; }
@@ -44,5 +45,6 @@ namespace AkilliMikroERP.Dtos
         public DateTimeOffset OrderDate { get; set; }
         public DateTimeOffset? DeliveryDate { get; set; }
         public List<OrderItemReadDto> Items { get; set; } = new();
+        public decimal TotalAmount { get; set; } // EKLENDİ: Toplam tutar
     }
 }

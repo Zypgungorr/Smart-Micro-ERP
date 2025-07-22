@@ -4,6 +4,7 @@ using AkilliMikroERP.Data;
 using AkilliMikroERP.Models;
 using AkilliMikroERP.Dtos;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AkilliMikroERP.Controllers
 {
@@ -22,6 +23,7 @@ namespace AkilliMikroERP.Controllers
 
         // GET: api/orders
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<OrderReadDto>>> GetOrders()
         {
             var orders = await _context.Orders
@@ -36,6 +38,7 @@ namespace AkilliMikroERP.Controllers
 
         // GET: api/orders/{id}
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<OrderReadDto>> GetOrder(Guid id)
         {
             var order = await _context.Orders
@@ -52,10 +55,14 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/orders
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<OrderReadDto>> CreateOrder(OrderCreateDto orderCreateDto)
         {
             var order = _mapper.Map<Order>(orderCreateDto);
             order.OrderDate = DateTimeOffset.UtcNow;
+            
+            // Otomatik sipariş numarası üret
+            order.OrderNumber = await GenerateUniqueOrderNumber();
 
             if (order.DeliveryDate.HasValue)
                 order.DeliveryDate = order.DeliveryDate.Value.ToUniversalTime();
@@ -75,8 +82,28 @@ namespace AkilliMikroERP.Controllers
             return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, orderReadDto);
         }
 
+        // Benzersiz sipariş numarası üretme metodu
+        private async Task<string> GenerateUniqueOrderNumber()
+        {
+            var random = new Random();
+            string orderNumber;
+            bool isUnique = false;
+
+            do
+            {
+                // 6 haneli random sayı üret (100000-999999)
+                orderNumber = random.Next(100000, 1000000).ToString();
+                
+                // Veritabanında bu numara var mı kontrol et
+                isUnique = !await _context.Orders.AnyAsync(o => o.OrderNumber == orderNumber);
+            } while (!isUnique);
+
+            return orderNumber;
+        }
+
         // PUT: api/orders/{id}
         [HttpPut("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> UpdateOrder(Guid id, OrderUpdateDto orderUpdateDto)
         {
             var existingOrder = await _context.Orders
@@ -138,6 +165,7 @@ namespace AkilliMikroERP.Controllers
 
         // DELETE: api/orders/{id}
         [HttpDelete("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
             var order = await _context.Orders
