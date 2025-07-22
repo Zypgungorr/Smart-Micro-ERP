@@ -303,9 +303,11 @@ using AutoMapper;
 using AkilliMikroERP.Data;
 using AkilliMikroERP.Models;
 using AkilliMikroERP.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
+[AllowAnonymous]
 public class CustomerController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -316,6 +318,7 @@ public class CustomerController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult GetAll() => Ok(_context.Customers.ToList());
 
     [HttpGet("{id}")]
@@ -326,6 +329,7 @@ public class CustomerController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public IActionResult Create([FromBody] CustomerCreateDto dto)
     {
         var customer = new Customer
@@ -345,6 +349,7 @@ public class CustomerController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [AllowAnonymous]
     public IActionResult Update(Guid id, [FromBody] CustomerCreateDto dto)
     {
         var customer = _context.Customers.Find(id);
@@ -362,6 +367,7 @@ public class CustomerController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [AllowAnonymous]
     public IActionResult Delete(Guid id)
     {
         var customer = _context.Customers.Find(id);

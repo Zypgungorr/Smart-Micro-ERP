@@ -1,20 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, Bell, User } from "lucide-react";
+import Image from "next/image";
 
 export default function Header() {
   const [language, setLanguage] = useState("Türkçe");
   const [currency, setCurrency] = useState("₺ (Türk Lirası)");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
       {/* Logo */}
       <div className="flex items-center space-x-2">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">i</span>
-        </div>
-        <span className="text-xl font-bold text-gray-800">SMARTA</span>
+        {mounted && (
+          <Image 
+            src="/smarta1.png" 
+            alt="SMARTA Logo" 
+            width={32} 
+            height={32} 
+            className="h-6 w-auto"
+            priority
+          />
+        )}
       </div>
 
       {/* Sağ taraf kontrolleri */}

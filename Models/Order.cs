@@ -8,6 +8,7 @@ namespace AkilliMikroERP.Models
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    public string OrderNumber { get; set; } = string.Empty;
     public Guid CustomerId { get; set; }
     public Customer? Customer { get; set; }
 

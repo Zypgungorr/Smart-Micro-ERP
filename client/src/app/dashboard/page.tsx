@@ -186,39 +186,39 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <StatusCard
           title="Faturalar"
-          data={[
+            data={[
             { label: "Taslak", percentage: 0 },
             { label: "Bekliyor", percentage: 0 },
             { label: "Ödenmedi", percentage: 0 },
             { label: "Gecikmiş", percentage: 0 },
             { label: "Kısmi", percentage: 0 },
             { label: "Ödendi", percentage: 0 },
-          ]}
-        />
+            ]}
+          />
         <StatusCard
           title="Siparişler"
-          data={[
+            data={[
             { label: "Taslak", percentage: 0 },
             { label: "Bekliyor", percentage: 0 },
             { label: "Gönderildi", percentage: 0 },
             { label: "Reddedildi", percentage: 0 },
             { label: "Kabul Edildi", percentage: 0 },
             { label: "Süresi Doldu", percentage: 0 },
-          ]}
-        />
+            ]}
+          />
         <StatusCard
           title="Müşteriler"
-          data={[
+            data={[
             { label: "Yeni", percentage: 0 },
             { label: "Aktif", percentage: 0 },
             { label: "Pasif", percentage: 0 },
             { label: "VIP", percentage: 0 },
             { label: "Potansiyel", percentage: 0 },
             { label: "Kayıp", percentage: 0 },
-          ]}
-        />
+            ]}
+          />
         <CustomerPreviewCard />
-      </div>
+        </div>
 
       {/* Alt Satır - Son Aktiviteler */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
