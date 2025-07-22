@@ -2,63 +2,44 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Edit,
-  Trash2,
-  Package,
-  Eye,
-  AlertTriangle,
-  Sparkles,
-  Loader2,
-} from "lucide-react";
+import { Edit, Trash2, User, Mail, Phone, MapPin, Loader2, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
-interface Order {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  orderDate: string;
-  totalAmount: number;
-  paymentStatus: "Ödendi" | "Beklemede" | "İptal";
-  shippingStatus: "Hazırlanıyor" | "Kargoya Verildi" | "Teslim Edildi";
-  estimatedDeliveryDate: string;
-  items?: {
-    productName: string;
-    quantity: number;
-    unitPrice: number;
-    totalPrice: number;
-  }[];
+
+interface Customer {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  country: string;
+  type: string;
+  segment: string;
+  notes: string;
 }
 
-interface OrderTableProps {
-  orders: Order[];
+interface CustomerTableProps {
+  customers: Customer[];
   loading: boolean;
-  onEdit: (order: Order) => void;
-  onDelete: (id: string) => void;
+  onEdit: (customer: Customer) => void;
+  onDelete: (id: number) => void;
 }
 
-export default function OrderTable({
-  orders,
+export default function CustomerTable({
+  
+  customers,
   loading,
   onEdit,
   onDelete,
-}: OrderTableProps) {
-  const [stockEstimates, setStockEstimates] = useState<
-    Record<string, number | null>
-  >({});
-  const [loadingEstimates, setLoadingEstimates] = useState<
-    Record<string, boolean>
-  >({});
-  const [detailOrder, setDetailOrder] = useState<Order | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+}: CustomerTableProps) {
   const router = useRouter();
-
   if (loading) {
     return (
       <Card>
         <CardContent>
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-500">Ürünler yükleniyor...</p>
+            <p className="text-gray-500">Müşteriler yükleniyor...</p>
           </div>
         </CardContent>
       </Card>
@@ -68,7 +49,7 @@ export default function OrderTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sipariş Listesi</CardTitle>
+        <CardTitle>Müşteri Listesi</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -76,25 +57,22 @@ export default function OrderTable({
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Sipariş No
-                </th>
-                <th className="text-left py-3 px-4 font-medium text-gray-700">
                   Müşteri Adı
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Sipariş Tarihi
+                  Email
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Toplam Tutar
+                  Telefon
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Ödeme Durumu
+                  Şehir
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Kargo Durumu
+                  Tip
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Tahmini Teslim Tarihi
+                  Segment
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
                   İşlemler
@@ -102,78 +80,87 @@ export default function OrderTable({
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {customers.map((customer) => (
                 <tr
-                  key={order.id}
+                  key={customer.id}
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
                   <td className="py-3 px-4">
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {order.orderNumber}
-                      </p>
+                    <div className="flex items-center">
+                      <User className="w-4 h-4 text-blue-500 mr-2" />
+                      <span className="font-medium text-gray-900">
+                        {customer.name}
+                      </span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
-                    {order.customerName}
+                  <td className="py-3 px-4">
+                    <div className="flex items-center">
+                      <Mail className="w-4 h-4 text-green-500 mr-2" />
+                      <span className="text-sm text-gray-600">
+                        {customer.email || "-"}
+                      </span>
+                    </div>
                   </td>
                   <td className="py-3 px-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {order.orderDate
-                        ? order.orderDate.split("T")[0]
-                        : "Tarih girilmedi"}
-                    </span>
+                    <div className="flex items-center">
+                      <Phone className="w-4 h-4 text-purple-500 mr-2" />
+                      <span className="text-sm text-gray-600">
+                        {customer.phone || "-"}
+                      </span>
+                    </div>
                   </td>
-                  <td className="py-3 px-4 font-medium text-gray-900">
-                    ₺{(order.totalAmount ?? 0).toFixed(2)}
+                  <td className="py-3 px-4">
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 text-red-500 mr-2" />
+                      <span className="text-sm text-gray-600">
+                        {customer.city || "-"}
+                      </span>
+                    </div>
                   </td>
                   <td className="py-3 px-4">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        order.paymentStatus === "Ödendi"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
+                        customer.type === "kurumsal"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
                       }`}
                     >
-                      {order.paymentStatus}
+                      {customer.type === "kurumsal" ? "Kurumsal" : "Bireysel"}
                     </span>
                   </td>
-
                   <td className="py-3 px-4">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        order.shippingStatus === "Hazırlanıyor"
+                        customer.segment === "premium"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : customer.segment === "standart"
+                          ? "bg-blue-100 text-blue-800"
+                          : customer.segment === "ekonomik"
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {order.shippingStatus}
+                      {customer.segment || "Belirtilmemiş"}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {order.estimatedDeliveryDate}
-                    </span>
-                  </td>
-
                   <td className="py-3 px-4">
                     <div className="flex space-x-2">
-                      <button
-                        onClick={() => router.push(`/orders/${order.id}`)}
+                    <button
+                        onClick={() => router.push(`/customers/${customer.id}`)}
                         className="text-green-600 hover:text-green-800"
                         title="Detayları Görüntüle"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => onEdit(order)}
+                        onClick={() => onEdit(customer)}
                         className="text-blue-600 hover:text-blue-800"
                         title="Düzenle"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => onDelete(order.id)}
+                        onClick={() => onDelete(customer.id)}
                         className="text-red-600 hover:text-red-800"
                         title="Sil"
                       >
@@ -185,10 +172,10 @@ export default function OrderTable({
               ))}
             </tbody>
           </table>
-          {orders.length === 0 && !loading && (
+          {customers.length === 0 && !loading && (
             <div className="text-center py-8">
-              <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">Ürün bulunamadı</p>
+              <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">Müşteri bulunamadı</p>
             </div>
           )}
         </div>
