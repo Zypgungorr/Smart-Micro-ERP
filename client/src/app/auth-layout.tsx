@@ -1,13 +1,13 @@
-// app/layout.tsx
+// app/auth-layout.tsx
 import { AuthProvider } from "../lib/context/AuthContext";
 import "./globals.css";
 
 export const metadata = {
-  title: "Smart Micro ERP",
-  description: "AI Destekli ERP Yönetim Paneli",
+  title: "Smart Micro ERP - Giriş",
+  description: "Smart Micro ERP Giriş Sayfası",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr">
       <body 
@@ -20,4 +20,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
-}
+} 

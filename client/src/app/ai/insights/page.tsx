@@ -1,8 +1,14 @@
+"use client";
+
+import AppWrapper from "@/components/AppWrapper";
+
 export default function InsightsPage() {
     return (
-      <div>
-        <h1 className="text-2xl font-bold mb-4">Ürünler</h1>
-        <p>Ürünler listesi burada olacak.</p>
-      </div>
+      <AppWrapper>
+        <div>
+          <h1 className="text-2xl font-bold mb-4">AI İçgörüler</h1>
+          <p>AI destekli iş analizleri burada olacak.</p>
+        </div>
+      </AppWrapper>
     );
   }

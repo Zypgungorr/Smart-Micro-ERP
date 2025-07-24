@@ -6,6 +6,7 @@ using BCrypt.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 
 namespace AkilliMikroERP.Controllers
@@ -22,12 +23,26 @@ namespace AkilliMikroERP.Controllers
             _context = context;
             _geminiService = geminiService;
         }
+
+        // Kullanıcı ID'sini JWT token'dan al
+        private Guid? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                return userId;
+            }
+            return null;
+        }
         // GET: api/products?search=xyz
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll(string? search = null)
         {
-            var query = _context.Products.Include(p => p.Category).AsQueryable();
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Creator)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -86,9 +101,15 @@ namespace AkilliMikroERP.Controllers
 
         // POST api/products
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
         {
+            var currentUserId = GetCurrentUserId();
+            if (!currentUserId.HasValue)
+            {
+                return Unauthorized("Kullanıcı kimliği doğrulanamadı");
+            }
+
             var product = new Product
             {
                 Name = dto.Name,
@@ -102,9 +123,9 @@ namespace AkilliMikroERP.Controllers
                 Description = dto.Description,
                 AiDescription = dto.AiDescription,
                 PhotoUrl = dto.PhotoUrl,
+                CreatedBy = currentUserId.Value,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
-                // CreatedBy ataması yapılabilir (auth bağlamında)
             };
 
             _context.Products.Add(product);
@@ -115,7 +136,7 @@ namespace AkilliMikroERP.Controllers
 
         // PUT api/products/{id}
         [HttpPut("{id}")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)
         {
             if (id != dto.Id)
@@ -144,7 +165,7 @@ namespace AkilliMikroERP.Controllers
 
         // DELETE api/products/{id}
         [HttpDelete("{id}")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> Delete(Guid id)
         {
             var product = await _context.Products.FindAsync(id);

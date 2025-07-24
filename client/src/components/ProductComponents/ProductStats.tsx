@@ -3,6 +3,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Package, Tag, DollarSign, Hash, AlertTriangle } from "lucide-react";
 
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'TRY'
+  }).format(amount);
+};
 interface Product {
   id: string;
   name: string;
@@ -63,7 +69,7 @@ export default function ProductStats({ products, categories }: ProductStatsProps
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Toplam Değer</p>
-              <p className="text-2xl font-bold">₺{totalValue.toFixed(2)}</p>
+              <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
             </div>
           </div>
         </CardContent>

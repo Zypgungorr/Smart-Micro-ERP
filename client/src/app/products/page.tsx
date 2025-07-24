@@ -6,6 +6,8 @@ import ProductStats from "@/components/ProductComponents/ProductStats";
 import ProductFilters from "@/components/ProductComponents/ProductFilters";
 import ProductTable from "@/components/ProductComponents/ProductTable";
 import ProductForm from "@/components/ProductComponents/ProductForm";
+import AppWrapper from "@/components/AppWrapper";
+import { useAuth } from "@/lib/context/AuthContext";
 
 interface Product {
   id: string;
@@ -27,6 +29,7 @@ interface Category {
 }
 
 export default function ProductsPage() {
+  const { token } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +61,16 @@ export default function ProductsPage() {
 
     const fetchProducts = async () => {
       try {
+        const headers: HeadersInit = {
+          "Content-Type": "application/json",
+        };
+        
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
         const res = await fetch("http://localhost:5088/api/products", {
+          headers,
           cache: "no-store",
         });
 
@@ -188,11 +200,17 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
         photoUrl: null
       };
 
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch("http://localhost:5088/api/products", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(productToSend),
       });
 
@@ -250,11 +268,17 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
         photoUrl: null
       };
 
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(`http://localhost:5088/api/products/${productData.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(productToUpdate),
       });
 
@@ -292,8 +316,15 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
   const handleDeleteProduct = async (id: string) => {
     if (confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
       try {
+        const headers: HeadersInit = {};
+        
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
         const response = await fetch(`http://localhost:5088/api/products/${id}`, {
           method: "DELETE",
+          headers,
         });
 
         if (!response.ok) {
@@ -320,7 +351,8 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
   }
 
   return (
-    <div className="space-y-6">
+    <AppWrapper>
+      <div className="space-y-6">
       {/* Başlık ve İstatistikler */}
       <div className="flex justify-between items-center">
         <div>
@@ -378,6 +410,7 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppWrapper>
   );
 }
