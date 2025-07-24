@@ -6,8 +6,10 @@ namespace AkilliMikroERP.Models
     public class Invoice
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid OrderId { get; set; }
+        public Guid? OrderId { get; set; }
         public Order? Order { get; set; }
+        public Guid? CustomerId { get; set; }
+        public Customer? Customer { get; set; }
 
         public string? InvoiceNumber { get; set; }
         public decimal TotalAmount { get; set; }
@@ -15,7 +17,7 @@ namespace AkilliMikroERP.Models
         public DateTimeOffset IssuedAt { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset? DueDate { get; set; }
 
-        public string Status { get; set; } = "ödenmedi";
+        public string Status { get; set; } = "taslak";
 
         public DateTimeOffset InvoiceDate { get; set; } = DateTimeOffset.UtcNow;
 

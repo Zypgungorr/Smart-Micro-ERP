@@ -28,7 +28,6 @@ export default function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [modalMounted, setModalMounted] = useState(false);
 
-  // Modal için ayrı mounted state
   useEffect(() => {
     if (showAddModal || editingCustomer) {
       setModalMounted(true);
@@ -37,7 +36,6 @@ export default function CustomersPage() {
     }
   }, [showAddModal, editingCustomer]);
 
-  // Hydration için mounted state
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -153,7 +151,6 @@ export default function CustomersPage() {
         throw new Error(`API hatası: ${response.status} ${response.statusText}`);
       }
 
-      // Güncellenmiş müşteriyi listeye ekle
       const updatedCustomer: Customer = {
         ...customerToUpdate,
       };
@@ -189,7 +186,6 @@ export default function CustomersPage() {
     }
   };
 
-  // Hydration sırasında loading göster
   if (!mounted) {
     return (
       <div className="flex items-center justify-center min-h-screen">

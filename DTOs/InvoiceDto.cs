@@ -5,11 +5,14 @@ namespace AkilliMikroERP.Dtos
 {
     public class InvoiceCreateDto
     {
-        public Guid OrderId { get; set; }
+        public Guid? Id { get; set; }
+        public Guid? OrderId { get; set; }
+        public Guid? CustomerId { get; set; }
         public string InvoiceNumber { get; set; } = string.Empty;
         public decimal TotalAmount { get; set; }
         public DateTimeOffset IssuedAt { get; set; }
         public DateTimeOffset DueDate { get; set; }
+        public DateTimeOffset InvoiceDate { get; set; }
         public string Status { get; set; } = string.Empty;
         public List<InvoiceItemCreateDto> Items { get; set; } = new();
     }
@@ -50,6 +53,7 @@ namespace AkilliMikroERP.Dtos
     public DateTimeOffset? DueDate { get; set; }
     public DateTimeOffset InvoiceDate { get; set; }
     public decimal TotalAmount { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
     public List<InvoiceItemReadDto> Items { get; set; } = new();
 }
 

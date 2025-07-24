@@ -29,5 +29,5 @@ namespace AkilliMikroERP.Dtos
         public string? Segment { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<OrderReadDto> Orders { get; set; } = new();
-    }
+}
 }
