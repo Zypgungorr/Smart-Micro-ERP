@@ -5,6 +5,7 @@ import { Plus, Loader2 } from "lucide-react";
 import CustomerFilters from "@/components/CustomerComponents/CustomerFilters";
 import CustomerTable from "@/components/CustomerComponents/CustomerTable";
 import CustomerForm from "@/components/CustomerComponents/CustomerForm";
+import AppWrapper from "@/components/AppWrapper";
 
 interface Customer {
   id: number;
@@ -195,7 +196,8 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <AppWrapper>
+      <div className="space-y-6">
       {/* Başlık */}
       <div className="flex justify-between items-center">
         <div>
@@ -245,6 +247,7 @@ export default function CustomersPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppWrapper>
   );
 }

@@ -5,6 +5,7 @@ import { Plus, Loader2 } from "lucide-react";
 import OrderFilters from "@/components/OrderComponents/OrderFilters";
 import OrderTable from "@/components/OrderComponents/OrderTable";
 import OrderForm from "@/components/OrderComponents/OrderForm";
+import AppWrapper from "@/components/AppWrapper";
 
 interface Order {
   id: string;
@@ -395,7 +396,8 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <AppWrapper>
+      <div className="space-y-6">
       {/* Başlık */}
       <div className="flex justify-between items-center">
         <div>
@@ -447,6 +449,7 @@ export default function OrdersPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppWrapper>
   );
 }

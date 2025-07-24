@@ -12,6 +12,17 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('tr-TR');
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'TRY'
+  }).format(amount);
+};
 interface Order {
   id: string;
   orderNumber: string;
@@ -128,12 +139,12 @@ export default function OrderTable({
                   <td className="py-3 px-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {order.orderDate
-                        ? order.orderDate.split("T")[0]
+                        ? formatDate(order.orderDate)
                         : "Tarih girilmedi"}
                     </span>
                   </td>
                   <td className="py-3 px-4 font-medium text-gray-900">
-                    ₺{(order.totalAmount ?? 0).toFixed(2)}
+                    {formatCurrency(order.totalAmount)}
                   </td>
                   <td className="py-3 px-4">
                     <span

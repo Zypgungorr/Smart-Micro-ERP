@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { FileText, MessageSquare, Target, DollarSign, Users, Folder } from "lucide-react";
+import AppWrapper from "@/components/AppWrapper";
 
 // Özet Kartları Bileşeni
 function SummaryCard({ title, value, subtitle, icon: Icon, bgColor }: {
@@ -149,7 +150,8 @@ function RecentActivityTable({ title, headers, emptyMessage }: {
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6">
+    <AppWrapper>
+      <div className="space-y-6">
       {/* Üst Satır - Özet Kartları */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <SummaryCard
@@ -233,6 +235,7 @@ export default function DashboardPage() {
           emptyMessage="Veri yok"
         />
       </div>
-    </div>
+      </div>
+    </AppWrapper>
   );
 }

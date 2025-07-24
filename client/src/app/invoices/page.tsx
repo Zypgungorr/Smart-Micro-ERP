@@ -7,6 +7,7 @@ import InvoiceFilters from "@/components/InvoiceComponents/InvoiceFilters";
 import InvoiceStats from "@/components/InvoiceComponents/InvoiceStats";
 import InvoiceForm from "@/components/InvoiceComponents/InvoiceForm";
 import CreateInvoiceFromOrderModal from "@/components/InvoiceComponents/CreateInvoiceFromOrderModal";
+import AppWrapper from "@/components/AppWrapper";
 
 interface InvoiceItem {
   productId: string;
@@ -278,7 +279,8 @@ export default function InvoicesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <AppWrapper>
+      <div className="space-y-6">
       {/* Başlık */}
       <div className="flex justify-between items-center">
         <div>
@@ -353,6 +355,7 @@ export default function InvoicesPage() {
         }}
       />
 
-    </div>
+      </div>
+    </AppWrapper>
   );
 }

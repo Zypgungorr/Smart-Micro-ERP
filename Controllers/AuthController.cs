@@ -67,7 +67,15 @@ namespace AkilliMikroERP.Controllers
 
                 var token = _jwtService.GenerateToken(user.Id, user.Role?.Name ?? "user");
 
-                return Ok(new { token });
+                return Ok(new { 
+                    token,
+                    user = new {
+                        id = user.Id,
+                        name = user.Name,
+                        email = user.Email,
+                        role = user.Role?.Name ?? "user"
+                    }
+                });
             }
             catch (Exception ex)
             {

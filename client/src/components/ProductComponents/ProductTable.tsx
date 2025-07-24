@@ -4,6 +4,12 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Edit, Trash2, Package, Eye, AlertTriangle, Sparkles, Loader2 } from "lucide-react";
 
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'TRY'
+  }).format(amount);
+};
 interface Product {
   id: string;
   name: string;
@@ -135,7 +141,7 @@ export default function ProductTable({
                     </span>
                   </td>
                   <td className="py-3 px-4 font-medium text-gray-900">
-                    ₺{(product.priceSale ?? 0).toFixed(2)}
+                    {formatCurrency(product.priceSale)}
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center space-x-1">
