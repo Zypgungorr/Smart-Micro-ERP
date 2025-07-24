@@ -12,13 +12,14 @@ interface Order {
   customerName: string;
   orderDate: string;
   totalAmount: number;
+  status: string;
   paymentStatus: "Ödendi" | "Beklemede" | "İptal";
   shippingStatus: "Hazırlanıyor" | "Kargoya Verildi" | "Teslim Edildi";
   estimatedDeliveryDate: string;
 }
 
 interface Customer {
-  id: number;
+  id: string; // Guid olduğu için string olmalı
   name: string;
 }
 
@@ -165,7 +166,7 @@ export default function OrdersPage() {
         items: orderData.items.map((item: any) => ({
           productId: item.productId,
           quantity: item.quantity,
-          unitPrice: products.find((p) => p.id.toString() === item.productId.toString())?.priceSale || 0
+          unitPrice: item.unitPrice || products.find((p) => p.id.toString() === item.productId.toString())?.priceSale || 0
         })),
         orderDate: orderData.orderDate,
         paymentType: orderData.paymentType,
@@ -194,7 +195,8 @@ export default function OrdersPage() {
         orderNumber: createdOrder.orderNumber,
         customerName: orderData.customerName,
         orderDate: createdOrder.orderDate,
-        totalAmount: createdOrder.totalAmount || 0,
+        totalAmount: createdOrder.totalAmount || orderData.items.reduce((total: number, item: any) => total + (item.totalPrice || 0), 0),
+        status: createdOrder.status || "hazırlanıyor",
         paymentStatus: createdOrder.paymentStatus || "Beklemede",
         shippingStatus: createdOrder.shippingStatus || "Hazırlanıyor",
         estimatedDeliveryDate: createdOrder.estimatedDeliveryDate || "",
@@ -202,7 +204,7 @@ export default function OrdersPage() {
 
       setOrders([...orders, newOrder]);
       setShowAddModal(false);
-      alert("Sipariş başarıyla eklendi!");
+      alert("Sipariş başarıyla eklendi! Sipariş onaylandıktan sonra fatura oluşturabilirsiniz.");
     } catch (error) {
       console.error("Sipariş eklerken hata:", error);
       alert("Sipariş eklenirken bir hata oluştu!");
@@ -211,22 +213,45 @@ export default function OrdersPage() {
 
   const handleEditOrder = async (orderData: any) => {
     try {
-      // Müşteri ID'sini bul
-      const customer = customers.find(cus => cus.name === orderData.customerName);
+      // Sipariş ID'sini kontrol et
+      if (!orderData.id) {
+        alert("Sipariş ID'si bulunamadı!");
+        return;
+      }
+
+      // Müşteri ID'sini kontrol et
+      if (!orderData.customerId || orderData.customerId === "") {
+        alert("Müşteri seçimi zorunludur!");
+        return;
+      }
+
+      // Müşteri ID'si zaten string (GUID) formatında
+      const customerId = orderData.customerId;
+
+      // Müşteri adını bul (string karşılaştırması)
+      const customer = customers.find(cus => cus.id === customerId);
       if (!customer) {
         alert("Müşteri bulunamadı!");
         return;
       }
 
+      // Toplam tutarı hesapla
+      const totalAmount = orderData.items.reduce((total: number, item: any) => total + (item.totalPrice || 0), 0);
+      
       const orderToUpdate = {
         id: orderData.id,
         orderNumber: orderData.orderNumber,
-        customerId: customer.id,
+        customerId: customerId, // GUID string olarak
         orderDate: orderData.orderDate,
-        totalAmount: orderData.totalAmount,
+        totalAmount: totalAmount,
         paymentStatus: orderData.paymentStatus,
         shippingStatus: orderData.shippingStatus,
         estimatedDeliveryDate: orderData.estimatedDeliveryDate,
+        items: orderData.items.map((item: any) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice || 0
+        }))
       };
 
       const response = await fetch(`http://localhost:5088/api/orders/${orderData.id}`, {
@@ -245,9 +270,10 @@ export default function OrdersPage() {
       const updatedOrder: Order = {
         id: orderData.id,
         orderNumber: orderData.orderNumber,
-        customerName: orderData.customerName,
+        customerName: customer.name, // Müşteri adını doğru şekilde set et
         orderDate: orderData.orderDate,
-        totalAmount: orderData.totalAmount,
+        totalAmount: totalAmount, // Hesaplanan toplam tutarı kullan
+        status: orderData.status || "hazırlanıyor",
         paymentStatus: orderData.paymentStatus,
         shippingStatus: orderData.shippingStatus,
         estimatedDeliveryDate: orderData.estimatedDeliveryDate,
@@ -272,14 +298,89 @@ export default function OrdersPage() {
         });
 
         if (!response.ok) {
-          throw new Error(`API hatası: ${response.status} ${response.statusText}`);
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || `API hatası: ${response.status} ${response.statusText}`
+          );
         }
 
         setOrders(orders.filter((o) => o.id !== id));
         alert("Sipariş başarıyla silindi!");
       } catch (error) {
         console.error("Sipariş silerken hata:", error);
-        alert("Sipariş silinirken bir hata oluştu!");
+        alert(
+          `Sipariş silinirken hata: ${
+            error instanceof Error ? error.message : "Bilinmeyen hata"
+          }`
+        );
+      }
+    }
+  };
+
+  const handleApproveOrder = async (id: string) => {
+    if (confirm("Bu siparişi onaylamak istediğinizden emin misiniz?")) {
+      try {
+        const response = await fetch(
+          `http://localhost:5088/api/orders/${id}/approve`,
+          {
+            method: "POST",
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || `API hatası: ${response.status}`
+          );
+        }
+
+        // Sipariş listesini güncelle
+        setOrders(orders.map((order) =>
+          order.id === id ? { ...order, status: "onaylandı" } : order
+        ));
+
+        alert("Sipariş başarıyla onaylandı!");
+      } catch (error) {
+        console.error("Sipariş onaylarken hata:", error);
+        alert(
+          `Sipariş onaylanırken hata: ${
+            error instanceof Error ? error.message : "Bilinmeyen hata"
+          }`
+        );
+      }
+    }
+  };
+
+  const handleRejectOrder = async (id: string) => {
+    if (confirm("Bu siparişi reddetmek istediğinizden emin misiniz?")) {
+      try {
+        const response = await fetch(
+          `http://localhost:5088/api/orders/${id}/reject`,
+          {
+            method: "POST",
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || `API hatası: ${response.status}`
+          );
+        }
+
+        // Sipariş listesini güncelle
+        setOrders(orders.map((order) =>
+          order.id === id ? { ...order, status: "iptal" } : order
+        ));
+
+        alert("Sipariş başarıyla reddedildi!");
+      } catch (error) {
+        console.error("Sipariş reddederken hata:", error);
+        alert(
+          `Sipariş reddedilirken hata: ${
+            error instanceof Error ? error.message : "Bilinmeyen hata"
+          }`
+        );
       }
     }
   };
@@ -324,6 +425,8 @@ export default function OrdersPage() {
         loading={loading}
         onEdit={setEditingOrder}
         onDelete={handleDeleteOrder}
+        onApprove={handleApproveOrder}
+        onReject={handleRejectOrder}
       />
 
       {/* Sipariş Ekleme/Düzenleme Modal */}

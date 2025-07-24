@@ -83,18 +83,18 @@ export default function CustomerForm({ customer, onSubmit, onCancel }: CustomerF
       <div>
         <label className="block mb-1 text-sm font-medium text-gray-700">Müşteri Adı</label>
         <input
-          type="text"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
       </div>
 
       {/* Email */}
       <div>
         <label className="block mb-1 text-sm font-medium text-gray-700">Email</label>
-        <input
+            <input
           type="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}

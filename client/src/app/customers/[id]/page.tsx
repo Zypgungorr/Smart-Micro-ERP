@@ -98,30 +98,30 @@ export default function CustomerDetailPage() {
             <div className="mb-2 text-sm text-gray-800">
               <b>Sipariş No:</b> {order.orderNumber} <b>Tarih:</b> {order.orderDate ? order.orderDate.split("T")[0] : "-"} <b>Toplam:</b> ₺{order.totalAmount?.toFixed(2)}
             </div>
-            <table className="w-full text-xs border">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-1 text-left">Ürün</th>
-                  <th className="p-1 text-right">Adet</th>
-                  <th className="p-1 text-right">Birim Fiyat</th>
-                  <th className="p-1 text-right">Toplam</th>
-                </tr>
-              </thead>
-              <tbody>
+        <table className="w-full text-xs border">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-1 text-left">Ürün</th>
+              <th className="p-1 text-right">Adet</th>
+              <th className="p-1 text-right">Birim Fiyat</th>
+              <th className="p-1 text-right">Toplam</th>
+            </tr>
+          </thead>
+          <tbody>
                 {order.items && order.items.length > 0 ? (
                   order.items.map((item, idx) => (
-                    <tr key={idx}>
-                      <td className="p-1">{item.productName || '-'}</td>
-                      <td className="p-1 text-right">{item.quantity}</td>
-                      <td className="p-1 text-right">₺{item.unitPrice.toFixed(2)}</td>
-                      <td className="p-1 text-right">₺{item.totalPrice.toFixed(2)}</td>
-                    </tr>
+              <tr key={idx}>
+                <td className="p-1">{item.productName || '-'}</td>
+                <td className="p-1 text-right">{item.quantity}</td>
+                <td className="p-1 text-right">₺{item.unitPrice.toFixed(2)}</td>
+                <td className="p-1 text-right">₺{item.totalPrice.toFixed(2)}</td>
+              </tr>
                   ))
                 ) : (
                   <tr><td colSpan={4} className="text-center text-gray-500">Siparişe ait ürün bulunamadı.</td></tr>
                 )}
-              </tbody>
-            </table>
+          </tbody>
+        </table>
           </div>
         ))
       ) : (

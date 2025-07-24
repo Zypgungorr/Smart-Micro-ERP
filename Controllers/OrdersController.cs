@@ -82,6 +82,8 @@ namespace AkilliMikroERP.Controllers
             return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, orderReadDto);
         }
 
+
+
         // Benzersiz sipariş numarası üretme metodu
         private async Task<string> GenerateUniqueOrderNumber()
         {
@@ -99,6 +101,84 @@ namespace AkilliMikroERP.Controllers
             } while (!isUnique);
 
             return orderNumber;
+        }
+
+        // POST: api/orders/{id}/approve - Siparişi onayla
+        [HttpPost("{id}/approve")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ApproveOrder(Guid id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Items)
+                    .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
+            {
+                return NotFound(new { message = "Sipariş bulunamadı." });
+            }
+
+            if (order.Status == "onaylandı")
+            {
+                return BadRequest(new { message = "Bu sipariş zaten onaylanmış." });
+            }
+
+            if (order.Status == "iptal")
+            {
+                return BadRequest(new { message = "İptal edilmiş sipariş onaylanamaz." });
+            }
+
+            // Siparişi onayla
+            order.Status = "onaylandı";
+            order.ApprovedAt = DateTimeOffset.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { 
+                message = "Sipariş başarıyla onaylandı.",
+                orderId = order.Id,
+                status = order.Status
+            });
+        }
+
+        // POST: api/orders/{id}/reject - Siparişi reddet
+        [HttpPost("{id}/reject")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RejectOrder(Guid id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Items)
+                    .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
+            {
+                return NotFound(new { message = "Sipariş bulunamadı." });
+            }
+
+            if (order.Status == "onaylandı")
+            {
+                return BadRequest(new { message = "Onaylanmış sipariş reddedilemez." });
+            }
+
+            if (order.Status == "iptal")
+            {
+                return BadRequest(new { message = "Bu sipariş zaten iptal edilmiş." });
+            }
+
+            // Siparişi reddet
+            order.Status = "iptal";
+            order.RejectedAt = DateTimeOffset.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { 
+                message = "Sipariş başarıyla reddedildi.",
+                orderId = order.Id,
+                status = order.Status
+            });
         }
 
         // PUT: api/orders/{id}
@@ -168,19 +248,39 @@ namespace AkilliMikroERP.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
-            var order = await _context.Orders
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.Items)
+                    .Include(o => o.Invoice) // İlişkili faturayı da kontrol et
+                    .FirstOrDefaultAsync(o => o.Id == id);
 
-            if (order == null) return NotFound();
+                if (order == null) 
+                    return NotFound(new { message = "Sipariş bulunamadı." });
 
-            if (order.Items != null)
-                _context.OrderItems.RemoveRange(order.Items);
+                // İlişkili fatura varsa sil
+                if (order.Invoice != null)
+                {
+                    _context.Invoices.Remove(order.Invoice);
+                }
 
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
+                // Sipariş kalemlerini sil
+                if (order.Items != null && order.Items.Any())
+                {
+                    _context.OrderItems.RemoveRange(order.Items);
+                }
 
-            return NoContent();
+                // Siparişi sil
+                _context.Orders.Remove(order);
+                
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Sipariş başarıyla silindi." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Sipariş silinirken hata oluştu: {ex.Message}" });
+            }
         }
     }
 }

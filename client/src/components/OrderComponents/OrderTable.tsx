@@ -18,6 +18,7 @@ interface Order {
   customerName: string;
   orderDate: string;
   totalAmount: number;
+  status: string;
   paymentStatus: "Ödendi" | "Beklemede" | "İptal";
   shippingStatus: "Hazırlanıyor" | "Kargoya Verildi" | "Teslim Edildi";
   estimatedDeliveryDate: string;
@@ -34,6 +35,8 @@ interface OrderTableProps {
   loading: boolean;
   onEdit: (order: Order) => void;
   onDelete: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
 }
 
 export default function OrderTable({
@@ -41,6 +44,8 @@ export default function OrderTable({
   loading,
   onEdit,
   onDelete,
+  onApprove,
+  onReject,
 }: OrderTableProps) {
   const [stockEstimates, setStockEstimates] = useState<
     Record<string, number | null>
@@ -88,6 +93,9 @@ export default function OrderTable({
                   Toplam Tutar
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
+                  Durum
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">
                   Ödeme Durumu
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
@@ -126,6 +134,21 @@ export default function OrderTable({
                   </td>
                   <td className="py-3 px-4 font-medium text-gray-900">
                     ₺{(order.totalAmount ?? 0).toFixed(2)}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        order.status === "onaylandı"
+                          ? "bg-green-100 text-green-800"
+                          : order.status === "iptal"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {order.status === "onaylandı" ? "Onaylandı" : 
+                       order.status === "iptal" ? "İptal" : 
+                       order.status === "hazırlanıyor" ? "Hazırlanıyor" : order.status}
+                    </span>
                   </td>
                   <td className="py-3 px-4">
                     <span
@@ -172,6 +195,24 @@ export default function OrderTable({
                       >
                         <Edit className="w-4 h-4" />
                       </button>
+                      {order.status === "hazırlanıyor" && (
+                        <>
+                          <button
+                            onClick={() => onApprove?.(order.id)}
+                            className="text-green-600 hover:text-green-800"
+                            title="Onayla"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={() => onReject?.(order.id)}
+                            className="text-red-600 hover:text-red-800"
+                            title="Reddet"
+                          >
+                            ✗
+                          </button>
+                        </>
+                      )}
                       <button
                         onClick={() => onDelete(order.id)}
                         className="text-red-600 hover:text-red-800"

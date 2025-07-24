@@ -11,7 +11,7 @@ interface OrderFormProps {
 }
 
 interface Customer {
-  id: number;
+  id: string; // Guid olduğu için string olmalı
   name: string;
 }
 
@@ -19,6 +19,7 @@ interface Product {
   id: number;
   name: string;
   stock: number;
+  priceSale: number; // Satış fiyatı
 }
 
 export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps) {
@@ -27,7 +28,9 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
   const [products, setProducts] = useState<Product[]>([]);
 
   const [formData, setFormData] = useState({
+    id: order?.id || "", // Sipariş ID'si eklendi
     customerId: order?.customerId || "",
+    customerName: order?.customerName || "", // Müşteri adını da sakla
     items: order?.items || [{ productId: "", quantity: 1 }],
     orderDate: order?.orderDate || new Date().toISOString().split("T")[0],
     paymentType: order?.paymentType || "Kredi Kartı",
@@ -55,9 +58,45 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
     fetchProducts();
   }, [mounted]);
 
+  // Güncelleme modunda mevcut sipariş bilgilerini yükle
+  useEffect(() => {
+    if (order && customers.length > 0) {
+      // Mevcut müşteri ID'sini bul ve set et
+      const currentCustomer = customers.find(c => c.name === order.customerName);
+      
+      if (currentCustomer) {
+        setFormData(prev => ({
+          ...prev,
+          id: order.id, // Sipariş ID'sini de set et
+          customerId: currentCustomer.id.toString(),
+          customerName: currentCustomer.name
+        }));
+      }
+    }
+  }, [order, customers]);
+
   const handleItemChange = (index: number, field: string, value: any) => {
     const newItems = [...formData.items];
     newItems[index][field] = value;
+    
+    // Eğer ürün seçildiyse fiyatını da al
+    if (field === "productId" && value) {
+      const selectedProduct = products.find(p => p.id.toString() === value);
+      if (selectedProduct) {
+        newItems[index].unitPrice = selectedProduct.priceSale;
+        newItems[index].totalPrice = selectedProduct.priceSale * (newItems[index].quantity || 1);
+      }
+    }
+    
+    // Eğer miktar değiştiyse toplam fiyatı güncelle
+    if (field === "quantity") {
+      const quantity = parseInt(value) || 0;
+      newItems[index].quantity = quantity;
+      if (newItems[index].unitPrice) {
+        newItems[index].totalPrice = newItems[index].unitPrice * quantity;
+      }
+    }
+    
     setFormData({ ...formData, items: newItems });
   };
 
@@ -90,35 +129,48 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
     <form onSubmit={handleSubmit} className="space-y-4 w-full">
       {/* Müşteri seçimi */}
       <div>
-        <label className="block mb-1 text-sm font-medium text-gray-700">Müşteri</label>
+        <label className="block mb-1 text-sm font-medium text-gray-700">
+          Müşteri {order && formData.customerName && `(Mevcut: ${formData.customerName})`}
+        </label>
         <select
           value={formData.customerId}
-          onChange={(e) => setFormData({ ...formData, customerId: e.target.value })}
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedCustomer = customers.find(c => c.id === selectedId);
+            setFormData({ 
+              ...formData, 
+              customerId: selectedId,
+              customerName: selectedCustomer?.name || ""
+            });
+          }}
           className="w-full px-3 py-2 border rounded-lg"
           required
         >
-          <option value="">Seçin</option>
+          <option value="">Müşteri Seçin *</option>
           {customers.map((c: Customer) => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
+        {!formData.customerId && (
+          <p className="text-sm text-red-500 mt-1">Müşteri seçimi zorunludur!</p>
+        )}
       </div>
 
       {/* Ürünler ve adetler (çoklu) */}
       <div className="space-y-2">
         <label className="block mb-1 text-sm font-medium text-gray-700">Ürünler</label>
-        {formData.items.map((item: { productId: string; quantity: number }, idx: number) => (
-          <div key={idx} className="flex gap-2 items-center">
+        {formData.items.map((item: { productId: string; quantity: number; unitPrice?: number; totalPrice?: number }, idx: number) => (
+          <div key={idx} className="flex gap-2 items-center p-3 border rounded-lg">
             <select
               value={item.productId}
               onChange={(e) => handleItemChange(idx, "productId", e.target.value)}
-              className="px-3 py-2 border rounded-lg"
+              className="flex-1 px-3 py-2 border rounded-lg"
               required
             >
-              <option value="">Seçin</option>
+              <option value="">Ürün Seçin</option>
               {products.map((p: Product) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} (Stok: {p.stock})
+                  {p.name} - ₺{p.priceSale} (Stok: {p.stock})
                 </option>
               ))}
             </select>
@@ -127,15 +179,29 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
               min="1"
               value={item.quantity}
               onChange={(e) => handleItemChange(idx, "quantity", parseInt(e.target.value))}
-              className="w-24 px-3 py-2 border rounded-lg"
+              className="w-20 px-3 py-2 border rounded-lg"
+              placeholder="Adet"
               required
             />
+            <div className="w-24 text-sm text-gray-600">
+              {item.unitPrice ? `₺${item.unitPrice}` : 'Fiyat'}
+            </div>
+            <div className="w-24 text-sm font-medium">
+              {item.totalPrice ? `₺${item.totalPrice}` : 'Toplam'}
+            </div>
             {formData.items.length > 1 && (
               <button type="button" onClick={() => handleRemoveItem(idx)} className="text-red-500 px-2">Sil</button>
             )}
           </div>
         ))}
         <button type="button" onClick={handleAddItem} className="mt-2 px-3 py-1 bg-gray-200 rounded">+ Ürün Ekle</button>
+        
+        {/* Toplam Tutar */}
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+          <div className="text-lg font-semibold text-gray-800">
+            Toplam Tutar: ₺{formData.items.reduce((total: number, item: any) => total + (item.totalPrice || 0), 0).toFixed(2)}
+          </div>
+        </div>
       </div>
 
       {/* Sipariş tarihi */}
