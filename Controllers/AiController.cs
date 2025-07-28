@@ -15,7 +15,7 @@ namespace AkilliMikroERP.Controllers
         {
             _geminiService = geminiService;
         }
-
+        
         [AllowAnonymous]
         [HttpPost("ask")]
         public async Task<IActionResult> AskGemini([FromBody] PromptRequest request)

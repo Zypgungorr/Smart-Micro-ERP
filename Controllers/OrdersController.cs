@@ -30,9 +30,18 @@ namespace AkilliMikroERP.Controllers
                 .Include(o => o.Customer)
                 .Include(o => o.Items)
                     .ThenInclude(oi => oi.Product)
+                .Include(o => o.Invoice) // Fatura bilgisini de getir
                 .ToListAsync();
 
             var orderDtos = _mapper.Map<List<OrderReadDto>>(orders);
+            
+            // Her sipariş için hasInvoice bilgisini ekle
+            foreach (var orderDto in orderDtos)
+            {
+                var order = orders.FirstOrDefault(o => o.Id == orderDto.Id);
+                orderDto.HasInvoice = order?.Invoice != null;
+            }
+            
             return Ok(orderDtos);
         }
 
@@ -252,16 +261,18 @@ namespace AkilliMikroERP.Controllers
             {
                 var order = await _context.Orders
                     .Include(o => o.Items)
-                    .Include(o => o.Invoice) // İlişkili faturayı da kontrol et
+                    .Include(o => o.Invoice) // İlişkili faturayı kontrol et
                     .FirstOrDefaultAsync(o => o.Id == id);
 
                 if (order == null) 
                     return NotFound(new { message = "Sipariş bulunamadı." });
 
-                // İlişkili fatura varsa sil
+                // İlişkili fatura varsa silmeye izin verme
                 if (order.Invoice != null)
                 {
-                    _context.Invoices.Remove(order.Invoice);
+                    return BadRequest(new { 
+                        message = "Bu siparişe bağlı fatura bulunmaktadır. Fatura kesilmiş siparişler silinemez. Siparişi 'İptal Edildi' olarak işaretleyebilirsiniz." 
+                    });
                 }
 
                 // Sipariş kalemlerini sil

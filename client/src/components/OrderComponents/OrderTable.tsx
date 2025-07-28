@@ -33,6 +33,7 @@ interface Order {
   paymentStatus: "Ödendi" | "Beklemede" | "İptal";
   shippingStatus: "Hazırlanıyor" | "Kargoya Verildi" | "Teslim Edildi";
   estimatedDeliveryDate: string;
+  hasInvoice?: boolean;
   items?: {
     productName: string;
     quantity: number;
@@ -226,8 +227,13 @@ export default function OrderTable({
                       )}
                       <button
                         onClick={() => onDelete(order.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Sil"
+                        disabled={order.hasInvoice}
+                        className={`${
+                          order.hasInvoice 
+                            ? "text-gray-400 cursor-not-allowed" 
+                            : "text-red-600 hover:text-red-800"
+                        }`}
+                        title={order.hasInvoice ? "Bu siparişe bağlı fatura var. Silinemez." : "Sil"}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

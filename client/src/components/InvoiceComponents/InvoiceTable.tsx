@@ -162,7 +162,7 @@ export default function InvoiceTable({
                   Durum
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Ürün Sayısı
+                  Toplam Adet
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">
                   İşlemler
@@ -217,7 +217,7 @@ export default function InvoiceTable({
                   </td>
                   <td className="py-3 px-4">
                     <span className="text-sm text-gray-600">
-                      {invoice.items?.length || 0} ürün
+                      {invoice.items?.reduce((total, item) => total + item.quantity, 0) || 0} adet
                     </span>
                   </td>
                   <td className="py-3 px-4">

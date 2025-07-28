@@ -13,7 +13,6 @@ namespace AkilliMikroERP.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [AllowAnonymous]
     public class CategoriesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -25,6 +24,7 @@ namespace AkilliMikroERP.Controllers
 
         // GET api/categories
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var categories = await _context.Categories.ToListAsync();
@@ -33,6 +33,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST api/categories
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] Category category)
         {
             _context.Categories.Add(category);
@@ -42,6 +43,7 @@ namespace AkilliMikroERP.Controllers
 
         // GET api/categories/{id}
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
             var category = await _context.Categories.FindAsync(id);
@@ -51,6 +53,7 @@ namespace AkilliMikroERP.Controllers
 
         // PUT api/categories/{id}
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Update(int id, [FromBody] Category updatedCategory)
         {
             if (id != updatedCategory.Id) return BadRequest();
@@ -66,6 +69,7 @@ namespace AkilliMikroERP.Controllers
 
         // DELETE api/categories/{id}
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             var category = await _context.Categories.FindAsync(id);

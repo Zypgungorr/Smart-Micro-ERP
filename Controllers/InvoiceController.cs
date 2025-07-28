@@ -292,7 +292,7 @@ namespace AkilliMikroERP.Controllers
             var aiRecommendations = await GetAIRecommendations(invoice);
 
             // Faturayı onayla
-            invoice.Status = "ödenmedi";
+            invoice.Status = "Ödenmedi";
             invoice.IssuedAt = DateTimeOffset.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -437,7 +437,7 @@ namespace AkilliMikroERP.Controllers
                 var customerId = invoice.Order.Customer.Id;
                 var overdueInvoices = await _context.Invoices
                     .Where(i => i.Order.Customer.Id == customerId && 
-                               i.Status == "ödenmedi" && 
+                               i.Status == "Ödenmedi" && 
                                i.DueDate < DateTimeOffset.UtcNow)
                     .CountAsync();
 

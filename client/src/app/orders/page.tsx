@@ -17,6 +17,7 @@ interface Order {
   paymentStatus: "Ödendi" | "Beklemede" | "İptal";
   shippingStatus: "Hazırlanıyor" | "Kargoya Verildi" | "Teslim Edildi";
   estimatedDeliveryDate: string;
+  hasInvoice?: boolean;
 }
 
 interface Customer {
