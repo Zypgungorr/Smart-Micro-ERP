@@ -47,5 +47,6 @@ namespace AkilliMikroERP.Dtos
         public DateTimeOffset? DeliveryDate { get; set; }
         public List<OrderItemReadDto> Items { get; set; } = new();
         public decimal TotalAmount { get; set; } // EKLENDİ: Toplam tutar
+        public bool HasInvoice { get; set; } // EKLENDİ: Fatura var mı?
     }
 }

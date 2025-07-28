@@ -101,7 +101,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST api/products
         [HttpPost]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
         {
             var currentUserId = GetCurrentUserId();
@@ -136,7 +136,7 @@ namespace AkilliMikroERP.Controllers
 
         // PUT api/products/{id}
         [HttpPut("{id}")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)
         {
             if (id != dto.Id)
