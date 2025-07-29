@@ -29,6 +29,8 @@ interface ProductTableProps {
   loading: boolean;
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 export default function ProductTable({
@@ -36,6 +38,8 @@ export default function ProductTable({
   loading,
   onEdit,
   onDelete,
+  canEdit = true,
+  canDelete = true,
 }: ProductTableProps) {
   const [stockEstimates, setStockEstimates] = useState<Record<string, number | null>>({});
   const [loadingEstimates, setLoadingEstimates] = useState<Record<string, boolean>>({});
@@ -202,20 +206,24 @@ export default function ProductTable({
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => onEdit(product)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Düzenle"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onDelete(product.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Sil"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(product)}
+                          className="text-blue-600 hover:text-blue-800"
+                          title="Düzenle"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(product.id)}
+                          className="text-red-600 hover:text-red-800"
+                          title="Sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

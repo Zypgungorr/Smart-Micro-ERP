@@ -2,11 +2,24 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { FileText, MessageSquare, Target, DollarSign, Users, Folder } from "lucide-react";
+import {
+  FileText,
+  MessageSquare,
+  Target,
+  DollarSign,
+  Users,
+  Folder,
+} from "lucide-react";
 import AppWrapper from "@/components/AppWrapper";
 
 // Özet Kartları Bileşeni
-function SummaryCard({ title, value, subtitle, icon: Icon, bgColor }: {
+function SummaryCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  bgColor,
+}: {
   title: string;
   value: string;
   subtitle: string;
@@ -22,7 +35,9 @@ function SummaryCard({ title, value, subtitle, icon: Icon, bgColor }: {
             <p className="text-2xl font-bold text-gray-900">{value}</p>
             <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
           </div>
-          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${bgColor}`}>
+          <div
+            className={`w-12 h-12 rounded-lg flex items-center justify-center ${bgColor}`}
+          >
             <Icon className="w-6 h-6 text-white" />
           </div>
         </div>
@@ -32,7 +47,10 @@ function SummaryCard({ title, value, subtitle, icon: Icon, bgColor }: {
 }
 
 // Detaylı Durum Kartı Bileşeni
-function StatusCard({ title, data }: {
+function StatusCard({
+  title,
+  data,
+}: {
   title: string;
   data: { label: string; percentage: number; color?: string }[];
 }) {
@@ -48,10 +66,7 @@ function StatusCard({ title, data }: {
               <span className="text-gray-700">{item.label}</span>
               <span className="text-gray-600">{item.percentage}%</span>
             </div>
-            <Progress 
-              value={item.percentage} 
-              className="h-2 bg-gray-200"
-            />
+            <Progress value={item.percentage} className="h-2 bg-gray-200" />
           </div>
         ))}
       </CardContent>
@@ -88,11 +103,11 @@ function CustomerPreviewCard() {
               fill="transparent"
               transform="rotate(-90 50 50)"
             />
-            <text 
-              x="50" 
-              y="50" 
-              textAnchor="middle" 
-              dominantBaseline="middle" 
+            <text
+              x="50"
+              y="50"
+              textAnchor="middle"
+              dominantBaseline="middle"
               className="text-2xl font-bold text-gray-700"
             >
               0%
@@ -109,7 +124,11 @@ function CustomerPreviewCard() {
 }
 
 // Son Aktivite Tablosu
-function RecentActivityTable({ title, headers, emptyMessage }: {
+function RecentActivityTable({
+  title,
+  headers,
+  emptyMessage,
+}: {
   title: string;
   headers: string[];
   emptyMessage: string;
@@ -125,7 +144,10 @@ function RecentActivityTable({ title, headers, emptyMessage }: {
             <thead>
               <tr className="border-b border-gray-200">
                 {headers.map((header, index) => (
-                  <th key={index} className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                  <th
+                    key={index}
+                    className="text-left py-3 px-4 text-sm font-medium text-gray-700"
+                  >
                     {header}
                   </th>
                 ))}
@@ -152,89 +174,83 @@ export default function DashboardPage() {
   return (
     <AppWrapper>
       <div className="space-y-6">
-      {/* Üst Satır - Özet Kartları */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <SummaryCard
-          title="Faturalar"
-          value="₺ 00.00"
-          subtitle="Bu Ay"
-          icon={FileText}
-          bgColor="bg-blue-500"
-        />
-        <SummaryCard
-          title="Ödemeler"
-          value="₺ 00.00"
-          subtitle="Bu Ay"
-          icon={DollarSign}
-          bgColor="bg-green-500"
-        />
-        <SummaryCard
-          title="Siparişler"
-          value="₺ 00.00"
-          subtitle="Bu Ay"
-          icon={Target}
-          bgColor="bg-purple-500"
-        />
-        <SummaryCard
-          title="Bekleyen"
-          value="₺ 00.00"
-          subtitle="Ödenmedi"
-          icon={DollarSign}
-          bgColor="bg-red-500"
-        />
-      </div>
-
-      {/* Orta Satır - Detaylı Durumlar ve Müşteri Önizleme */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <StatusCard
-          title="Faturalar"
-            data={[
-            { label: "Taslak", percentage: 0 },
-            { label: "Bekliyor", percentage: 0 },
-            { label: "Ödenmedi", percentage: 0 },
-            { label: "Gecikmiş", percentage: 0 },
-            { label: "Kısmi", percentage: 0 },
-            { label: "Ödendi", percentage: 0 },
-            ]}
+        {/* Üst Satır - Özet Kartları */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <SummaryCard
+            title="Faturalar"
+            value="₺ 00.00"
+            subtitle="Bu Ay"
+            icon={FileText}
+            bgColor="bg-blue-500"
           />
-        <StatusCard
-          title="Siparişler"
-            data={[
-            { label: "Taslak", percentage: 0 },
-            { label: "Bekliyor", percentage: 0 },
-            { label: "Gönderildi", percentage: 0 },
-            { label: "Reddedildi", percentage: 0 },
-            { label: "Kabul Edildi", percentage: 0 },
-            { label: "Süresi Doldu", percentage: 0 },
-            ]}
+          <SummaryCard
+            title="Ödemeler"
+            value="₺ 00.00"
+            subtitle="Bu Ay"
+            icon={DollarSign}
+            bgColor="bg-green-500"
           />
-        <StatusCard
-          title="Müşteriler"
-            data={[
-            { label: "Yeni", percentage: 0 },
-            { label: "Aktif", percentage: 0 },
-            { label: "Pasif", percentage: 0 },
-            { label: "VIP", percentage: 0 },
-            { label: "Potansiyel", percentage: 0 },
-            { label: "Kayıp", percentage: 0 },
-            ]}
+          <SummaryCard
+            title="Siparişler"
+            value="₺ 00.00"
+            subtitle="Bu Ay"
+            icon={Target}
+            bgColor="bg-purple-500"
           />
-        <CustomerPreviewCard />
+          <SummaryCard
+            title="Bekleyen"
+            value="₺ 00.00"
+            subtitle="Ödenmedi"
+            icon={DollarSign}
+            bgColor="bg-red-500"
+          />
         </div>
 
-      {/* Alt Satır - Son Aktiviteler */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentActivityTable
-          title="Son Faturalar"
-          headers={["Numara", "Müşteri", "Toplam", "Durum"]}
-          emptyMessage="Veri yok"
-        />
-        <RecentActivityTable
-          title="Son Siparişler"
-          headers={["Numara", "Müşteri", "Toplam", "Durum"]}
-          emptyMessage="Veri yok"
-        />
-      </div>
+        {/* Orta Satır - Detaylı Durumlar ve Müşteri Önizleme */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <StatusCard
+            title="Faturalar"
+            data={[
+              { label: "Ödendi", percentage: 0 },
+              { label: "Ödenmedi", percentage: 0 },
+              { label: "Kısmi Ödendi", percentage: 0 },
+              { label: "Taslak", percentage: 0 },
+            ]}
+          />
+          <StatusCard
+            title="Ödemeler"
+            data={[
+              { label: "Nakit", percentage: 0 },
+              { label: "Kredi Kartı", percentage: 0 },
+              { label: "Banka Havalesi", percentage: 0 },
+            ]}
+          />
+          <StatusCard
+            title="Siparişler"
+            data={[
+              { label: "Onaylandı", percentage: 0 },
+              { label: "Reddedildi", percentage: 0 },
+              { label: "Kargoya verildi", percentage: 0 },
+              { label: "Teslim Edildi", percentage: 0 },
+              { label: "İptal", percentage: 0 },
+            ]}
+          />
+          <CustomerPreviewCard />
+        </div>
+
+        {/* Alt Satır - Son Aktiviteler */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <RecentActivityTable
+            title="Son Faturalar"
+            headers={["Numara", "Müşteri", "Toplam", "Durum"]}
+            emptyMessage="Veri yok"
+          />
+          <RecentActivityTable
+            title="Son Siparişler"
+            headers={["Numara", "Müşteri", "Toplam", "Durum"]}
+            emptyMessage="Veri yok"
+          />
+        </div>
       </div>
     </AppWrapper>
   );

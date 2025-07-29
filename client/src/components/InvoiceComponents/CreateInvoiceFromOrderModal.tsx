@@ -50,14 +50,14 @@ export default function CreateInvoiceFromOrderModal({
       const response = await fetch("http://localhost:5088/api/orders");
       if (response.ok) {
         const data = await response.json();
-        // Sadece onaylanmış siparişleri göster
-        const confirmedOrders = data.filter((order: Order) => 
-          order.status === "onaylandı" || order.status === "tamamlandı"
+        // Sadece kargoya verilmiş siparişleri göster
+        const shippedOrders = data.filter((order: Order) => 
+          order.status === "kargoya_verildi"
         );
         
         // Her sipariş için fatura kontrolü yap
         const ordersWithInvoiceInfo = await Promise.all(
-          confirmedOrders.map(async (order: Order) => {
+          shippedOrders.map(async (order: Order) => {
             try {
               const invoiceResponse = await fetch(`http://localhost:5088/api/invoice`);
               if (invoiceResponse.ok) {

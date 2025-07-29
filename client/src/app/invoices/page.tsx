@@ -8,6 +8,7 @@ import InvoiceStats from "@/components/InvoiceComponents/InvoiceStats";
 import InvoiceForm from "@/components/InvoiceComponents/InvoiceForm";
 import CreateInvoiceFromOrderModal from "@/components/InvoiceComponents/CreateInvoiceFromOrderModal";
 import AppWrapper from "@/components/AppWrapper";
+import { useAuth } from "@/lib/context/AuthContext";
 
 interface InvoiceItem {
   productId: string;
@@ -31,6 +32,7 @@ interface Invoice {
 }
 
 export default function InvoicesPage() {
+  const { hasAnyRole } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -50,7 +52,6 @@ export default function InvoicesPage() {
     }
   }, [showAddModal, editingInvoice]);
 
-  // Hydration için mounted state
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -148,7 +149,7 @@ export default function InvoicesPage() {
 
         setInvoices(
           invoices.map((invoice) =>
-            invoice.id === id ? { ...invoice, status: "ödenmedi" } : invoice
+            invoice.id === id ? { ...invoice, status: "Ödenmedi" } : invoice
           )
         );
 
@@ -287,22 +288,24 @@ export default function InvoicesPage() {
           <h1 className="text-3xl font-bold text-gray-900">Faturalar</h1>
           <p className="text-gray-600 mt-1">Fatura yönetimi ve takibi</p>
         </div>
-        <div className="flex space-x-2">
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-            <span>Yeni Fatura</span>
-          </button>
-          <button
-            onClick={() => setShowCreateFromOrderModal(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700 transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Siparişlerden Fatura Oluştur</span>
-        </button>
-        </div>
+        {hasAnyRole(["Muhasebeci", "Admin"]) && (
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Yeni Fatura</span>
+            </button>
+            <button
+              onClick={() => setShowCreateFromOrderModal(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700 transition-colors"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Siparişlerden Fatura Oluştur</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* İstatistikler */}
@@ -325,6 +328,10 @@ export default function InvoicesPage() {
         onDelete={handleDeleteInvoice}
         onApprove={handleApproveInvoice}
         onReject={handleRejectInvoice}
+        canEdit={hasAnyRole(["Muhasebeci", "Admin"])}
+        canDelete={hasAnyRole(["Muhasebeci", "Admin"])}
+        canApprove={hasAnyRole(["Muhasebeci", "Admin"])}
+        canReject={hasAnyRole(["Muhasebeci", "Admin"])}
       />
 
 

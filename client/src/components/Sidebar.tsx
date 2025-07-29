@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/context/AuthContext";
 import { 
   Clock, 
   FileText, 
@@ -13,24 +14,28 @@ import {
   ShoppingCart, 
   BarChart3, 
   User,
-  Settings
+  Settings,
+  Warehouse
 } from "lucide-react";
-
-const menuItems = [
-  { label: "Dashboard", href: "/dashboard", icon: Clock },
-  { label: "Faturalar", href: "/invoices", icon: FileText },
-  { label: "Ödemeler", href: "/payments", icon: CreditCard },
-  { label: "Müşteriler", href: "/customers", icon: Users },
-  { label: "Şirketler", href: "/companies", icon: Building },
-  { label: "Ürünler", href: "/products", icon: Package },
-  { label: "Siparişler", href: "/orders", icon: ShoppingCart },
-  { label: "Raporlar", href: "/reports", icon: BarChart3 },
-  { label: "Kullanıcılar", href: "/users", icon: User },
-  { label: "Ayarlar", href: "/settings", icon: Settings },
-];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { hasRole, hasAnyRole } = useAuth();
+
+  const menuItems = [
+    { label: "Dashboard", href: "/dashboard", icon: Clock },
+    { label: "Ürünler", href: "/products", icon: Package },
+    { label: "Siparişler", href: "/orders", icon: ShoppingCart },
+    { label: "Depo Yönetimi", href: "/warehouse", icon: Warehouse },
+    { label: "Faturalar", href: "/invoices", icon: FileText },
+    { label: "Ödemeler", href: "/payments", icon: CreditCard },
+    { label: "Müşteriler", href: "/customers", icon: Users },
+
+  { label: "Şirketler", href: "/companies", icon: Building },
+    { label: "Raporlar", href: "/reports", icon: BarChart3 },
+    { label: "Kullanıcılar", href: "/users", icon: User },
+    { label: "Ayarlar", href: "/settings", icon: Settings },
+  ];
 
   return (
     <aside className="w-64 h-screen fixed top-0 left-0 bg-white shadow-md border-r border-gray-200 z-10">
