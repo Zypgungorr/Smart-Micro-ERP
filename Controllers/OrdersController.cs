@@ -4,6 +4,7 @@ using AkilliMikroERP.Data;
 using AkilliMikroERP.Models;
 using AkilliMikroERP.Dtos;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AkilliMikroERP.Controllers
 {
@@ -22,20 +23,31 @@ namespace AkilliMikroERP.Controllers
 
         // GET: api/orders
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<OrderReadDto>>> GetOrders()
         {
             var orders = await _context.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.Items)
                     .ThenInclude(oi => oi.Product)
+                .Include(o => o.Invoice) // Fatura bilgisini de getir
                 .ToListAsync();
 
             var orderDtos = _mapper.Map<List<OrderReadDto>>(orders);
+            
+            // Her sipariş için hasInvoice bilgisini ekle
+            foreach (var orderDto in orderDtos)
+            {
+                var order = orders.FirstOrDefault(o => o.Id == orderDto.Id);
+                orderDto.HasInvoice = order?.Invoice != null;
+            }
+            
             return Ok(orderDtos);
         }
 
         // GET: api/orders/{id}
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<OrderReadDto>> GetOrder(Guid id)
         {
             var order = await _context.Orders
@@ -52,10 +64,14 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/orders
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<OrderReadDto>> CreateOrder(OrderCreateDto orderCreateDto)
         {
             var order = _mapper.Map<Order>(orderCreateDto);
             order.OrderDate = DateTimeOffset.UtcNow;
+            
+            // Otomatik sipariş numarası üret
+            order.OrderNumber = await GenerateUniqueOrderNumber();
 
             if (order.DeliveryDate.HasValue)
                 order.DeliveryDate = order.DeliveryDate.Value.ToUniversalTime();
@@ -75,8 +91,108 @@ namespace AkilliMikroERP.Controllers
             return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, orderReadDto);
         }
 
+
+
+        // Benzersiz sipariş numarası üretme metodu
+        private async Task<string> GenerateUniqueOrderNumber()
+        {
+            var random = new Random();
+            string orderNumber;
+            bool isUnique = false;
+
+            do
+            {
+                // 6 haneli random sayı üret (100000-999999)
+                orderNumber = random.Next(100000, 1000000).ToString();
+                
+                // Veritabanında bu numara var mı kontrol et
+                isUnique = !await _context.Orders.AnyAsync(o => o.OrderNumber == orderNumber);
+            } while (!isUnique);
+
+            return orderNumber;
+        }
+
+        // POST: api/orders/{id}/approve - Siparişi onayla
+        [HttpPost("{id}/approve")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ApproveOrder(Guid id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Items)
+                    .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
+            {
+                return NotFound(new { message = "Sipariş bulunamadı." });
+            }
+
+            if (order.Status == "onaylandı")
+            {
+                return BadRequest(new { message = "Bu sipariş zaten onaylanmış." });
+            }
+
+            if (order.Status == "iptal")
+            {
+                return BadRequest(new { message = "İptal edilmiş sipariş onaylanamaz." });
+            }
+
+            // Siparişi onayla
+            order.Status = "onaylandı";
+            order.ApprovedAt = DateTimeOffset.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { 
+                message = "Sipariş başarıyla onaylandı.",
+                orderId = order.Id,
+                status = order.Status
+            });
+        }
+
+        // POST: api/orders/{id}/reject - Siparişi reddet
+        [HttpPost("{id}/reject")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RejectOrder(Guid id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Items)
+                    .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
+            {
+                return NotFound(new { message = "Sipariş bulunamadı." });
+            }
+
+            if (order.Status == "onaylandı")
+            {
+                return BadRequest(new { message = "Onaylanmış sipariş reddedilemez." });
+            }
+
+            if (order.Status == "iptal")
+            {
+                return BadRequest(new { message = "Bu sipariş zaten iptal edilmiş." });
+            }
+
+            // Siparişi reddet
+            order.Status = "iptal";
+            order.RejectedAt = DateTimeOffset.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { 
+                message = "Sipariş başarıyla reddedildi.",
+                orderId = order.Id,
+                status = order.Status
+            });
+        }
+
         // PUT: api/orders/{id}
         [HttpPut("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> UpdateOrder(Guid id, OrderUpdateDto orderUpdateDto)
         {
             var existingOrder = await _context.Orders
@@ -138,21 +254,44 @@ namespace AkilliMikroERP.Controllers
 
         // DELETE: api/orders/{id}
         [HttpDelete("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
-            var order = await _context.Orders
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.Items)
+                    .Include(o => o.Invoice) // İlişkili faturayı kontrol et
+                    .FirstOrDefaultAsync(o => o.Id == id);
 
-            if (order == null) return NotFound();
+                if (order == null) 
+                    return NotFound(new { message = "Sipariş bulunamadı." });
 
-            if (order.Items != null)
-                _context.OrderItems.RemoveRange(order.Items);
+                // İlişkili fatura varsa silmeye izin verme
+                if (order.Invoice != null)
+                {
+                    return BadRequest(new { 
+                        message = "Bu siparişe bağlı fatura bulunmaktadır. Fatura kesilmiş siparişler silinemez. Siparişi 'İptal Edildi' olarak işaretleyebilirsiniz." 
+                    });
+                }
 
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
+                // Sipariş kalemlerini sil
+                if (order.Items != null && order.Items.Any())
+                {
+                    _context.OrderItems.RemoveRange(order.Items);
+                }
 
-            return NoContent();
+                // Siparişi sil
+                _context.Orders.Remove(order);
+                
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Sipariş başarıyla silindi." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Sipariş silinirken hata oluştu: {ex.Message}" });
+            }
         }
     }
 }

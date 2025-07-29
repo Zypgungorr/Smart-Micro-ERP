@@ -36,7 +36,7 @@ namespace AkilliMikroERP.Services
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
+                expires: DateTime.UtcNow.AddHours(3),
                 signingCredentials: creds
             );
 

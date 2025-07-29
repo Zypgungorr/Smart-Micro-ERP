@@ -11,6 +11,7 @@ namespace AkilliMikroERP.Dtos
         public decimal StockCritical { get; set; }
         public string? Unit { get; set; }
         public string? Description { get; set; }
+        public string? AiDescription { get; set; }
         public string? PhotoUrl { get; set; }
     }
 

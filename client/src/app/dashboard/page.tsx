@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { FileText, MessageSquare, Target, DollarSign, Users, Folder } from "lucide-react";
+import AppWrapper from "@/components/AppWrapper";
 
 // Özet Kartları Bileşeni
 function SummaryCard({ title, value, subtitle, icon: Icon, bgColor }: {
@@ -149,7 +150,8 @@ function RecentActivityTable({ title, headers, emptyMessage }: {
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6">
+    <AppWrapper>
+      <div className="space-y-6">
       {/* Üst Satır - Özet Kartları */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <SummaryCard
@@ -186,39 +188,39 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <StatusCard
           title="Faturalar"
-          data={[
+            data={[
             { label: "Taslak", percentage: 0 },
             { label: "Bekliyor", percentage: 0 },
             { label: "Ödenmedi", percentage: 0 },
             { label: "Gecikmiş", percentage: 0 },
             { label: "Kısmi", percentage: 0 },
             { label: "Ödendi", percentage: 0 },
-          ]}
-        />
+            ]}
+          />
         <StatusCard
           title="Siparişler"
-          data={[
+            data={[
             { label: "Taslak", percentage: 0 },
             { label: "Bekliyor", percentage: 0 },
             { label: "Gönderildi", percentage: 0 },
             { label: "Reddedildi", percentage: 0 },
             { label: "Kabul Edildi", percentage: 0 },
             { label: "Süresi Doldu", percentage: 0 },
-          ]}
-        />
+            ]}
+          />
         <StatusCard
           title="Müşteriler"
-          data={[
+            data={[
             { label: "Yeni", percentage: 0 },
             { label: "Aktif", percentage: 0 },
             { label: "Pasif", percentage: 0 },
             { label: "VIP", percentage: 0 },
             { label: "Potansiyel", percentage: 0 },
             { label: "Kayıp", percentage: 0 },
-          ]}
-        />
+            ]}
+          />
         <CustomerPreviewCard />
-      </div>
+        </div>
 
       {/* Alt Satır - Son Aktiviteler */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -233,6 +235,7 @@ export default function DashboardPage() {
           emptyMessage="Veri yok"
         />
       </div>
-    </div>
+      </div>
+    </AppWrapper>
   );
 }

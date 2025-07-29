@@ -21,6 +21,7 @@ namespace AkilliMikroERP.Dtos
         public string Status { get; set; } = "hazırlanıyor";
         public string PaymentStatus { get; set; } = "bekliyor";
         public DateTimeOffset? DeliveryDate { get; set; }
+        public decimal TotalAmount { get; set; } // Toplam tutar eklendi
         public List<OrderItemCreateDto> Items { get; set; } = new();
     }
 
@@ -37,6 +38,7 @@ namespace AkilliMikroERP.Dtos
     public class OrderReadDto
     {
         public Guid Id { get; set; }
+        public string OrderNumber { get; set; } = string.Empty;
         public Guid CustomerId { get; set; }
         public string? CustomerName { get; set; }
         public string? Status { get; set; }
@@ -44,5 +46,7 @@ namespace AkilliMikroERP.Dtos
         public DateTimeOffset OrderDate { get; set; }
         public DateTimeOffset? DeliveryDate { get; set; }
         public List<OrderItemReadDto> Items { get; set; } = new();
+        public decimal TotalAmount { get; set; } // EKLENDİ: Toplam tutar
+        public bool HasInvoice { get; set; } // EKLENDİ: Fatura var mı?
     }
 }

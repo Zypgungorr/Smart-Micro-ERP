@@ -8,6 +8,7 @@ namespace AkilliMikroERP.Models
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    public string OrderNumber { get; set; } = string.Empty;
     public Guid CustomerId { get; set; }
     public Customer? Customer { get; set; }
 
@@ -17,6 +18,8 @@ namespace AkilliMikroERP.Models
 
     public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? DeliveryDate { get; set; }
+    public DateTimeOffset? ApprovedAt { get; set; }
+    public DateTimeOffset? RejectedAt { get; set; }
 
     public Guid CreatedBy { get; set; }
     public User? Creator { get; set; }

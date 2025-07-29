@@ -3,8 +3,10 @@ using AkilliMikroERP.Dtos;
 using AkilliMikroERP.Models;
 using AkilliMikroERP.Services;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 
 namespace AkilliMikroERP.Controllers
@@ -14,16 +16,33 @@ namespace AkilliMikroERP.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        public ProductsController(ApplicationDbContext context)
+        private readonly GeminiService _geminiService;
+        
+        public ProductsController(ApplicationDbContext context, GeminiService geminiService)
         {
             _context = context;
+            _geminiService = geminiService;
         }
 
+        // Kullanıcı ID'sini JWT token'dan al
+        private Guid? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                return userId;
+            }
+            return null;
+        }
         // GET: api/products?search=xyz
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll(string? search = null)
         {
-            var query = _context.Products.Include(p => p.Category).AsQueryable();
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Creator)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -36,11 +55,14 @@ namespace AkilliMikroERP.Controllers
                     p.Id,
                     p.Name,
                     p.Sku,
+                    p.Description,
                     CategoryName = p.Category != null ? p.Category.Name : "",
                     p.PriceSale,
                     p.StockQuantity,
                     p.StockCritical,
-                    IsCritical = p.StockQuantity <= p.StockCritical
+                    IsCritical = p.StockQuantity <= p.StockCritical,
+                    Status = p.StockQuantity > 0 ? "active" : "inactive",
+                    p.CreatedAt
                 })
                 .ToListAsync();
 
@@ -49,6 +71,7 @@ namespace AkilliMikroERP.Controllers
 
         // GET api/products/{id}
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
             var product = await _context.Products
@@ -57,15 +80,19 @@ namespace AkilliMikroERP.Controllers
 
             if (product == null) return NotFound();
 
-            var result = new ProductDto
+            var result = new
             {
-                Id = product.Id,
-                Name = product.Name,
-                Category = new CategoryDto
-                {
-                    Id = product.Category.Id, 
-                    Name = product.Category.Name
-                }
+                product.Id,
+                product.Name,
+                product.Sku,
+                product.Description,
+                CategoryName = product.Category != null ? product.Category.Name : "",
+                product.PriceSale,
+                product.StockQuantity,
+                product.StockCritical,
+                IsCritical = product.StockQuantity <= product.StockCritical,
+                Status = product.StockQuantity > 0 ? "active" : "inactive",
+                product.CreatedAt
             };
 
             return Ok(result);
@@ -74,8 +101,15 @@ namespace AkilliMikroERP.Controllers
 
         // POST api/products
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
         {
+            var currentUserId = GetCurrentUserId();
+            if (!currentUserId.HasValue)
+            {
+                return Unauthorized("Kullanıcı kimliği doğrulanamadı");
+            }
+
             var product = new Product
             {
                 Name = dto.Name,
@@ -85,12 +119,13 @@ namespace AkilliMikroERP.Controllers
                 PricePurchase = dto.PricePurchase,
                 StockQuantity = dto.StockQuantity,
                 StockCritical = dto.StockCritical,
-                Unit = dto.Unit,
+                Unit = dto.Unit ?? "adet",
                 Description = dto.Description,
+                AiDescription = dto.AiDescription,
                 PhotoUrl = dto.PhotoUrl,
+                CreatedBy = currentUserId.Value,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
-                // CreatedBy ataması yapılabilir (auth bağlamında)
             };
 
             _context.Products.Add(product);
@@ -101,6 +136,7 @@ namespace AkilliMikroERP.Controllers
 
         // PUT api/products/{id}
         [HttpPut("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)
         {
             if (id != dto.Id)
@@ -116,8 +152,9 @@ namespace AkilliMikroERP.Controllers
             product.PricePurchase = dto.PricePurchase;
             product.StockQuantity = dto.StockQuantity;
             product.StockCritical = dto.StockCritical;
-            product.Unit = dto.Unit;
+            product.Unit = dto.Unit ?? "adet";
             product.Description = dto.Description;
+            product.AiDescription = dto.AiDescription;
             product.PhotoUrl = dto.PhotoUrl;
             product.UpdatedAt = DateTime.UtcNow;
 
@@ -128,6 +165,7 @@ namespace AkilliMikroERP.Controllers
 
         // DELETE api/products/{id}
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(Guid id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -137,6 +175,59 @@ namespace AkilliMikroERP.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // GET api/products/suggest-price
+        [HttpGet("suggest-price")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetSuggestedPrice([FromQuery] string productName, [FromQuery] string category, [FromQuery] decimal? purchasePrice = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(productName) || string.IsNullOrWhiteSpace(category))
+                {
+                    return BadRequest("Ürün adı ve kategori gereklidir.");
+                }
+
+                var suggestedPrice = await _geminiService.GetSuggestedPrice(
+                    productName, 
+                    category, 
+                    purchasePrice ?? 0
+                );
+
+                return Ok(new { suggestedPrice });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Fiyat önerisi alınırken hata oluştu.", details = ex.Message });
+            }
+        }
+
+        // GET api/products/estimate-stock-out
+        [HttpGet("estimate-stock-out")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetEstimatedStockOutDays([FromQuery] string productName, [FromQuery] string category, [FromQuery] int currentStock, [FromQuery] int? monthlySales = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(productName) || string.IsNullOrWhiteSpace(category))
+                {
+                    return BadRequest("Ürün adı ve kategori gereklidir.");
+                }
+
+                var estimatedDays = await _geminiService.GetEstimatedStockOutDays(
+                    productName, 
+                    category, 
+                    currentStock, 
+                    monthlySales ?? 0
+                );
+
+                return Ok(new { estimatedDays });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Stok tahmini alınırken hata oluştu.", details = ex.Message });
+            }
         }
     }
 }

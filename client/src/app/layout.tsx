@@ -1,6 +1,5 @@
 // app/layout.tsx
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
+import { AuthProvider } from "../lib/context/AuthContext";
 import "./globals.css";
 
 export const metadata = {
@@ -11,12 +10,13 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr">
-      <body className="flex min-h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 ml-64">
-          <Header />
-          <main className="p-6">{children}</main>
-        </div>
+      <body 
+        className="min-h-screen"
+        suppressHydrationWarning={true}
+      >
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

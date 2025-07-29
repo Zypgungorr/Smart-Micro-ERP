@@ -1,20 +1,57 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, Bell, User } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronDown, Bell, User, Settings, LogOut, User as UserIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useAuth } from "@/lib/context/AuthContext";
 
 export default function Header() {
   const [language, setLanguage] = useState("Türkçe");
   const [currency, setCurrency] = useState("₺ (Türk Lirası)");
+  const [mounted, setMounted] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user, logout } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Dropdown dışına tıklandığında kapatma
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowProfileDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setShowProfileDropdown(false);
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
       {/* Logo */}
       <div className="flex items-center space-x-2">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">i</span>
-        </div>
-        <span className="text-xl font-bold text-gray-800">SMARTA</span>
+        {mounted && (
+          // <Image
+          //   src="/logo.png"
+          //   alt="Logo"
+          //   width={32}
+          //   height={32}
+          //   className="h-6 w-auto"
+          //   priority
+          // />
+          <span className="font-serif text-2xl">SMART MICRO ERP</span>
+        )}
       </div>
 
       {/* Sağ taraf kontrolleri */}
@@ -55,12 +92,68 @@ export default function Header() {
           </span>
         </button>
 
-        {/* Kullanıcı profili */}
-        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors">
-          <span className="text-gray-700 font-semibold text-sm">Z</span>
+        {/* Kullanıcı profili dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+            className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center cursor-pointer hover:bg-orange-200 transition-colors"
+          >
+            <span className="text-orange-600 font-semibold text-sm">
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
+            </span>
+          </button>
+
+          {/* Dropdown menü */}
+          {showProfileDropdown && (
+            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+              {/* Kullanıcı bilgileri */}
+              <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <span className="text-orange-600 font-semibold">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">{user?.name || 'Kullanıcı'}</div>
+                    <div className="text-sm text-gray-600">{user?.email || 'email@example.com'}</div>
+                    <div className="mt-1">
+                      <span className="inline-block bg-yellow-100 text-orange-600 text-xs px-2 py-1 rounded-full">
+                        {user?.role === 'admin' ? 'Admin' : 'Account Owner'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Menü seçenekleri */}
+              <div className="py-2">
+                <Link href="/profile">
+                  <button className="w-full flex items-center space-x-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors">
+                    <UserIcon className="w-4 h-4" />
+                    <span>Profile Settings</span>
+                  </button>
+                </Link>
+                
+                <Link href="/settings">
+                  <button className="w-full flex items-center space-x-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors">
+                    <Settings className="w-4 h-4" />
+                    <span>App Settings</span>
+                  </button>
+                </Link>
+                
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
   );
 }
-
