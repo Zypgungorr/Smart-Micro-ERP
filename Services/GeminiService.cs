@@ -275,37 +275,111 @@ namespace AkilliMikroERP.Services
             };
         }
 
-        public async Task<decimal> GetSuggestedPrice(string productName, string category, decimal purchasePrice = 0)
+        public async Task<(decimal SuggestedPrice, (decimal Min, decimal Max)? PriceRange)> GetSuggestedPrice(string productName, string category, decimal purchasePrice = 0)
         {
             try
             {
                 var prompt = $@"
-                Sen bir fiyatlandırma uzmanısın. Aşağıdaki ürün için Türkiye pazarında uygun bir satış fiyatı öner:
+                Sen bir fiyatlandırma ve pazar analizi uzmanısın. Aşağıdaki ürün için Türkiye pazarında rekabetçi fiyat aralığı öner:
 
                 Ürün Adı: {productName}
                 Kategori: {category}
-                Alış Fiyatı: {purchasePrice:C} (eğer 0 ise, kategori ortalamasına göre tahmin et)
+                Alış Fiyatı: {purchasePrice:C}
 
-                Kurallar:
-                1. Sadece sayısal değer döndür (TL sembolü olmadan)
-                2. Türkiye pazarına uygun fiyatlandırma yap
-                3. Kategori ve ürün özelliklerine göre kar marjı belirle
-                4. Rekabetçi ama karlı bir fiyat öner
-                5. Sadece sayı döndür, açıklama yapma
+                PAZAR ANALİZİ YAP:
+                1. Türkiye'deki güncel piyasa fiyatlarını araştır
+                2. Benzer ürünlerin fiyatlarını karşılaştır
+                3. Minimum ve maksimum rekabetçi fiyat aralığı belirle
+                4. Kar marjını optimize et
 
-                Örnek çıktı: 125.50";
+                FİYAT ARALIĞI KURALLARI:
+                1. Format: 'min-max' şeklinde döndür (örn: 60000-65000)
+                2. Alış fiyatından düşük fiyat önerme
+                3. Minimum %15 kar marjı
+                4. Maksimum %100 kar marjı
+                5. Piyasa fiyatlarının %10-20 altında rekabetçi aralık
 
+                ÖRNEK ANALİZ:
+                - iPhone 15 Pro 256GB piyasa fiyatı: 65,000-75,000 TL
+                - Rekabetçi aralık: 60,000-65,000 TL
+                - Alış fiyatı 45,000 TL ise, öneri: 60000-65000
+
+                Sadece 'min-max' formatında döndür. Örnek çıktı: 60000-65000";
+
+                // AI'dan pazar analizi al
                 var response = await AskGemini(prompt, "gemini-1.5-flash", "price_suggestion");
                 
-                // Sadece sayısal değeri çıkar
-                var numericValue = ExtractNumericValue(response);
+                // Fiyat aralığını parse et (örn: "60000-65000")
+                var priceRange = ParsePriceRange(response);
                 
-                return numericValue > 0 ? numericValue : purchasePrice * 1.3m; // Fallback: %30 kar marjı
+                if (priceRange.HasValue)
+                {
+                    // Ortalama fiyatı döndür
+                    var averagePrice = (priceRange.Value.Min + priceRange.Value.Max) / 2;
+                    return (averagePrice, priceRange);
+                }
+                
+                // Fallback: Kategori bazlı kar marjı
+                var fallbackMultiplier = category.ToLower() switch
+                {
+                    "elektronik" => 1.25m, // %25 kar marjı
+                    "giyim" => 1.60m,      // %60 kar marjı
+                    "kitap" => 1.50m,      // %50 kar marjı
+                    "ev & yaşam" => 1.55m, // %55 kar marjı
+                    "spor" => 1.65m,       // %65 kar marjı
+                    _ => 1.40m             // %40 kar marjı (varsayılan)
+                };
+                
+                var fallbackPrice = purchasePrice * fallbackMultiplier;
+                return (fallbackPrice, null);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Fiyat önerisi hatası: {ex.Message}");
-                return purchasePrice > 0 ? purchasePrice * 1.3m : 100m; // Fallback değer
+                // Fallback: Kategori bazlı kar marjı
+                if (purchasePrice > 0)
+                {
+                    var fallbackMultiplier = category.ToLower() switch
+                    {
+                        "elektronik" => 1.25m, // %25 kar marjı
+                        "giyim" => 1.60m,      // %60 kar marjı
+                        "kitap" => 1.50m,      // %50 kar marjı
+                        "ev & yaşam" => 1.55m, // %55 kar marjı
+                        "spor" => 1.65m,       // %65 kar marjı
+                        _ => 1.40m             // %40 kar marjı (varsayılan)
+                    };
+                    
+                    var result = purchasePrice * fallbackMultiplier;
+                    
+                    // Sayı formatını düzelt (56.25 -> 56250)
+                    if (result < 1000 && purchasePrice > 1000)
+                    {
+                        result = result * 1000;
+                    }
+                    
+                    return (result, null);
+                }
+                return (100m, null); // Varsayılan değer
+            }
+        }
+
+        private (decimal Min, decimal Max)? ParsePriceRange(string text)
+        {
+            try
+            {
+                // "60000-65000" formatını ara
+                var match = System.Text.RegularExpressions.Regex.Match(text, @"(\d+)-(\d+)");
+                if (match.Success)
+                {
+                    var min = decimal.Parse(match.Groups[1].Value);
+                    var max = decimal.Parse(match.Groups[2].Value);
+                    return (min, max);
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
             }
         }
 
