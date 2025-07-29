@@ -9,7 +9,7 @@ namespace AkilliMikroERP.Models
         public string? Name { get; set; }
         public string? Email { get; set; }
         public string? PasswordHash { get; set; }
-        public int RoleId { get; set; } = 2; // Default user role id
+        public int RoleId { get; set; }
         public Role? Role { get; set; }
         public string Status { get; set; } = "active";
         public DateTime? LastLoginAt { get; set; }

@@ -23,14 +23,17 @@ interface CustomerTableProps {
   loading: boolean;
   onEdit: (customer: Customer) => void;
   onDelete: (id: number) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 export default function CustomerTable({
-  
   customers,
   loading,
   onEdit,
   onDelete,
+  canEdit = true,
+  canDelete = true,
 }: CustomerTableProps) {
   const router = useRouter();
   if (loading) {
@@ -145,27 +148,31 @@ export default function CustomerTable({
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex space-x-2">
-                    <button
+                      <button
                         onClick={() => router.push(`/customers/${customer.id}`)}
                         className="text-green-600 hover:text-green-800"
                         title="Detayları Görüntüle"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => onEdit(customer)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Düzenle"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onDelete(customer.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Sil"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(customer)}
+                          className="text-blue-600 hover:text-blue-800"
+                          title="Düzenle"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(customer.id)}
+                          className="text-red-600 hover:text-red-800"
+                          title="Sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

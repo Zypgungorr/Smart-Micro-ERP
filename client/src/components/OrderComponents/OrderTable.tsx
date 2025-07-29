@@ -49,6 +49,10 @@ interface OrderTableProps {
   onDelete: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canApprove?: boolean;
+  canReject?: boolean;
 }
 
 export default function OrderTable({
@@ -58,6 +62,10 @@ export default function OrderTable({
   onDelete,
   onApprove,
   onReject,
+  canEdit = true,
+  canDelete = true,
+  canApprove = true,
+  canReject = true,
 }: OrderTableProps) {
   const [stockEstimates, setStockEstimates] = useState<
     Record<string, number | null>
@@ -200,43 +208,47 @@ export default function OrderTable({
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => onEdit(order)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Düzenle"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      {order.status === "hazırlanıyor" && (
-                        <>
-                          <button
-                            onClick={() => onApprove?.(order.id)}
-                            className="text-green-600 hover:text-green-800"
-                            title="Onayla"
-                          >
-                            ✓
-                          </button>
-                          <button
-                            onClick={() => onReject?.(order.id)}
-                            className="text-red-600 hover:text-red-800"
-                            title="Reddet"
-                          >
-                            ✗
-                          </button>
-                        </>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(order)}
+                          className="text-blue-600 hover:text-blue-800"
+                          title="Düzenle"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
                       )}
-                      <button
-                        onClick={() => onDelete(order.id)}
-                        disabled={order.hasInvoice}
-                        className={`${
-                          order.hasInvoice 
-                            ? "text-gray-400 cursor-not-allowed" 
-                            : "text-red-600 hover:text-red-800"
-                        }`}
-                        title={order.hasInvoice ? "Bu siparişe bağlı fatura var. Silinemez." : "Sil"}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {order.status === "hazırlanıyor" && canApprove && (
+                        <button
+                          onClick={() => onApprove?.(order.id)}
+                          className="text-green-600 hover:text-green-800"
+                          title="Onayla"
+                        >
+                          ✓
+                        </button>
+                      )}
+                      {order.status === "hazırlanıyor" && canReject && (
+                        <button
+                          onClick={() => onReject?.(order.id)}
+                          className="text-red-600 hover:text-red-800"
+                          title="Reddet"
+                        >
+                          ✗
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(order.id)}
+                          disabled={order.hasInvoice}
+                          className={`${
+                            order.hasInvoice 
+                              ? "text-gray-400 cursor-not-allowed" 
+                              : "text-red-600 hover:text-red-800"
+                          }`}
+                          title={order.hasInvoice ? "Bu siparişe bağlı fatura var. Silinemez." : "Sil"}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

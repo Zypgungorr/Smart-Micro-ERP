@@ -78,7 +78,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/invoice
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize(Roles = "Muhasebeci,Admin")]
         public async Task<ActionResult<InvoiceReadDto>> CreateInvoice(InvoiceCreateDto invoiceDto)
         {
             try
@@ -253,7 +253,7 @@ namespace AkilliMikroERP.Controllers
 
         // DELETE: api/invoice/{id}
         [HttpDelete("{id}")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Muhasebeci,Admin")]
         public async Task<IActionResult> DeleteInvoice(Guid id)
         {
             var invoice = await _context.Invoices
@@ -271,7 +271,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/invoice/approve/{id} - Faturayı onayla
         [HttpPost("approve/{id}")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Muhasebeci,Admin")]
         public async Task<IActionResult> ApproveInvoice(Guid id)
         {
             var invoice = await _context.Invoices
@@ -305,7 +305,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/invoice/create-from-order/{orderId} - Siparişten fatura oluştur
         [HttpPost("create-from-order/{orderId}")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Muhasebeci,Admin")]
         public async Task<IActionResult> CreateInvoiceFromOrder(Guid orderId)
         {
             try
@@ -319,6 +319,12 @@ namespace AkilliMikroERP.Controllers
                 if (order == null)
                 {
                     return NotFound(new { message = "Sipariş bulunamadı." });
+                }
+
+                // Sipariş durumu kontrolü - sadece kargoya verilmiş siparişlerden fatura oluşturulabilir
+                if (order.Status != "kargoya_verildi")
+                {
+                    return BadRequest(new { message = "Sadece kargoya verilmiş siparişlerden fatura oluşturulabilir." });
                 }
 
                 // Bu siparişe ait fatura var mı kontrol et
@@ -376,7 +382,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/invoice/reject/{id} - Faturayı reddet/sil
         [HttpPost("reject/{id}")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Muhasebeci,Admin")]
         public async Task<IActionResult> RejectInvoice(Guid id)
         {
             var invoice = await _context.Invoices
@@ -482,7 +488,7 @@ namespace AkilliMikroERP.Controllers
 
         // GET: api/invoice/draft - Taslak faturaları getir
         [HttpGet("draft")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Muhasebeci,Admin")]
         public async Task<ActionResult<IEnumerable<InvoiceReadDto>>> GetDraftInvoices()
         {
             var invoices = await _context.Invoices

@@ -29,7 +29,7 @@ interface Category {
 }
 
 export default function ProductsPage() {
-  const { token } = useAuth();
+  const { token, hasAnyRole } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -361,13 +361,15 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
           </h1>
           <p className="text-gray-600 mt-1">Ürün yönetimi ve stok takibi</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Yeni Ürün Ekle</span>
-        </button>
+        {hasAnyRole(["Ürün Yöneticisi", "Admin"]) && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Yeni Ürün Ekle</span>
+          </button>
+        )}
       </div>
 
       {/* İstatistik Kartları */}
@@ -388,6 +390,8 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
         loading={loading}
         onEdit={setEditingProduct}
         onDelete={handleDeleteProduct}
+        canEdit={hasAnyRole(["Ürün Yöneticisi", "Admin"])}
+        canDelete={hasAnyRole(["Ürün Yöneticisi", "Admin"])}
       />
 
       {/* Ürün Ekleme/Düzenleme Modal */}

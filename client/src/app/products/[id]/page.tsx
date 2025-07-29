@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Edit, Package, Tag, DollarSign, Hash, Calendar, Eye, TrendingUp, AlertTriangle } from "lucide-react";
+import AppWrapper from "@/components/AppWrapper";
 
 interface Product {
   id: string;
@@ -105,6 +106,7 @@ export default function ProductDetailPage({ params }: Props) {
   }
 
   return (
+    <AppWrapper>
     <div className="space-y-6">
       {/* Başlık ve Geri Butonu */}
       <div className="flex items-center justify-between">
@@ -319,5 +321,7 @@ export default function ProductDetailPage({ params }: Props) {
         </div>
       </div>
     </div>
+    </AppWrapper>
   );
+  
 }

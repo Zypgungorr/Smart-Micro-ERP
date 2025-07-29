@@ -36,7 +36,8 @@ namespace AkilliMikroERP.Controllers
                     Email = dto.Email,
                     Name = dto.Name,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                    RoleId = 2
+                    RoleId = dto.RoleId 
+                    
                 };
 
                 _context.Users.Add(user);
@@ -65,7 +66,7 @@ namespace AkilliMikroERP.Controllers
                 if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                     return Unauthorized("Şifre yanlış.");
 
-                var token = _jwtService.GenerateToken(user.Id, user.Role?.Name ?? "user");
+                var token = _jwtService.GenerateToken(user);
 
                 return Ok(new { 
                     token,
@@ -73,7 +74,8 @@ namespace AkilliMikroERP.Controllers
                         id = user.Id,
                         name = user.Name,
                         email = user.Email,
-                        role = user.Role?.Name ?? "user"
+                        role = user.Role?.Name ?? "user",
+                        roleId = user.RoleId
                     }
                 });
             }

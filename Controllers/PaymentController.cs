@@ -121,7 +121,7 @@ public class PaymentController : ControllerBase
 
     // POST: api/payment
     [HttpPost]
-    [AllowAnonymous]
+    [Authorize(Roles = "Muhasebeci,Admin")]
     public async Task<ActionResult<PaymentReadDto>> Create([FromBody] PaymentCreateDto dto)
     {
         if (dto.Amount <= 0)

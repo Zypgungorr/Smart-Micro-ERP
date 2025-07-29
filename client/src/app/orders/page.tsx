@@ -6,6 +6,7 @@ import OrderFilters from "@/components/OrderComponents/OrderFilters";
 import OrderTable from "@/components/OrderComponents/OrderTable";
 import OrderForm from "@/components/OrderComponents/OrderForm";
 import AppWrapper from "@/components/AppWrapper";
+import { useAuth } from "@/lib/context/AuthContext";
 
 interface Order {
   id: string;
@@ -32,6 +33,7 @@ interface Product {
 }
 
 export default function OrdersPage() {
+  const { hasAnyRole } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -407,13 +409,15 @@ export default function OrdersPage() {
           </h1>
           <p className="text-gray-600 mt-1">Sipariş yönetimi ve takibi</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Yeni Sipariş Ekle</span>
-        </button>
+        {hasAnyRole(["Satış Temsilcisi", "Admin"]) && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Yeni Sipariş Ekle</span>
+          </button>
+        )}
       </div>
 
       {/* Filtreler */}
@@ -430,6 +434,10 @@ export default function OrdersPage() {
         onDelete={handleDeleteOrder}
         onApprove={handleApproveOrder}
         onReject={handleRejectOrder}
+        canEdit={hasAnyRole(["Satış Temsilcisi", "Admin"])}
+        canDelete={hasAnyRole(["Satış Temsilcisi", "Admin"])}
+        canApprove={hasAnyRole(["Sipariş Onay Yetkilisi", "Admin"])}
+        canReject={hasAnyRole(["Sipariş Onay Yetkilisi", "Admin"])}
       />
 
       {/* Sipariş Ekleme/Düzenleme Modal */}

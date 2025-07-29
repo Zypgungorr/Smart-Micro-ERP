@@ -26,6 +26,8 @@ interface PaymentTableProps {
   loading: boolean;
   onEdit: (payment: Payment) => void;
   onDelete: (id: string) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 const formatDate = (dateString: string) => {
@@ -70,6 +72,8 @@ export default function PaymentTable({
   loading,
   onEdit,
   onDelete,
+  canEdit = true,
+  canDelete = true,
 }: PaymentTableProps) {
   if (loading) {
     return (
@@ -154,20 +158,24 @@ export default function PaymentTable({
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex space-x-2">
-                      <button
-                        onClick={() => onEdit(payment)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Düzenle"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onDelete(payment.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Sil"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(payment)}
+                          className="text-blue-600 hover:text-blue-800"
+                          title="Düzenle"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(payment.id)}
+                          className="text-red-600 hover:text-red-800"
+                          title="Sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
