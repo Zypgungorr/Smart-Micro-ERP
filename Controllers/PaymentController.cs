@@ -70,7 +70,7 @@ public class PaymentController : ControllerBase
 
     // GET: api/payment/invoice/{invoiceId}
     [HttpGet("invoice/{invoiceId}")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<PaymentReadDto>>> GetByInvoice(Guid invoiceId)
     {
         var payments = await _context.Payments
@@ -121,7 +121,7 @@ public class PaymentController : ControllerBase
 
     // POST: api/payment
     [HttpPost]
-    [Authorize(Roles = "Muhasebeci,Admin")]
+    [AllowAnonymous]
     public async Task<ActionResult<PaymentReadDto>> Create([FromBody] PaymentCreateDto dto)
     {
         if (dto.Amount <= 0)

@@ -57,12 +57,11 @@ export default function PaymentForm({
           const data = await response.json();
           console.log("Gelen faturalar:", data); // Debug için
           console.log("Fatura durumları:", data.map((inv: Invoice) => ({ id: inv.id, status: inv.status })));
-          // Sadece ödenmemiş, kısmi ödenmiş veya taslak faturaları göster (case-insensitive)
+          // Sadece ödenmemiş ve kısmi ödenmiş faturaları göster (case-insensitive)
           const unpaidInvoices = data.filter((invoice: Invoice) => {
             const status = invoice.status.toLowerCase();
             return status === "ödenmedi" || 
-                   status === "kısmi ödendi" || 
-                   status === "taslak";
+                   status === "kısmi ödendi";
           });
           console.log("Filtrelenmiş faturalar:", unpaidInvoices);
           setInvoices(unpaidInvoices);

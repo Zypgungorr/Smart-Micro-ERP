@@ -78,7 +78,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/invoice
         [HttpPost]
-        [Authorize(Roles = "Muhasebeci,Admin")]
+        [AllowAnonymous]
         public async Task<ActionResult<InvoiceReadDto>> CreateInvoice(InvoiceCreateDto invoiceDto)
         {
             try
@@ -253,7 +253,7 @@ namespace AkilliMikroERP.Controllers
 
         // DELETE: api/invoice/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Muhasebeci,Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> DeleteInvoice(Guid id)
         {
             var invoice = await _context.Invoices
@@ -271,7 +271,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/invoice/approve/{id} - Faturayı onayla
         [HttpPost("approve/{id}")]
-        [Authorize(Roles = "Muhasebeci,Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> ApproveInvoice(Guid id)
         {
             var invoice = await _context.Invoices
@@ -305,7 +305,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/invoice/create-from-order/{orderId} - Siparişten fatura oluştur
         [HttpPost("create-from-order/{orderId}")]
-        [Authorize(Roles = "Muhasebeci,Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateInvoiceFromOrder(Guid orderId)
         {
             try
@@ -382,7 +382,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/invoice/reject/{id} - Faturayı reddet/sil
         [HttpPost("reject/{id}")]
-        [Authorize(Roles = "Muhasebeci,Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> RejectInvoice(Guid id)
         {
             var invoice = await _context.Invoices
@@ -488,7 +488,7 @@ namespace AkilliMikroERP.Controllers
 
         // GET: api/invoice/draft - Taslak faturaları getir
         [HttpGet("draft")]
-        [Authorize(Roles = "Muhasebeci,Admin")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<InvoiceReadDto>>> GetDraftInvoices()
         {
             var invoices = await _context.Invoices

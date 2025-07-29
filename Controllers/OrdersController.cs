@@ -114,7 +114,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/orders/{id}/approve - Siparişi onayla
         [HttpPost("{id}/approve")]
-        [Authorize(Roles = "Sipariş Onay Yetkilisi,Admin")] 
+        [AllowAnonymous]
         public async Task<IActionResult> ApproveOrder(Guid id)
         {
             var order = await _context.Orders
@@ -153,7 +153,7 @@ namespace AkilliMikroERP.Controllers
 
         // POST: api/orders/{id}/reject - Siparişi reddet
         [HttpPost("{id}/reject")]
-        [Authorize(Roles = "Sipariş Onay Yetkilisi,Admin")] 
+        [AllowAnonymous]
         public async Task<IActionResult> RejectOrder(Guid id)
         {
             var order = await _context.Orders

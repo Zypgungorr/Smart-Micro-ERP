@@ -33,7 +33,7 @@ interface Product {
 }
 
 export default function OrdersPage() {
-  const { hasAnyRole } = useAuth();
+  const { hasAnyRole, token } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -179,16 +179,30 @@ export default function OrdersPage() {
         notes: orderData.notes,
       };
 
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch("http://localhost:5088/api/orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(orderToSend),
       });
 
       if (!response.ok) {
-        throw new Error(`API hatası: ${response.status} ${response.statusText}`);
+        let errorMessage = `API hatası: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (jsonError) {
+          // JSON parse hatası durumunda status text'i kullan
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       const createdOrder = await response.json();
@@ -258,16 +272,30 @@ export default function OrdersPage() {
         }))
       };
 
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(`http://localhost:5088/api/orders/${orderData.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(orderToUpdate),
       });
 
       if (!response.ok) {
-        throw new Error(`API hatası: ${response.status} ${response.statusText}`);
+        let errorMessage = `API hatası: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (jsonError) {
+          // JSON parse hatası durumunda status text'i kullan
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       // Güncellenmiş siparişi listeye ekle
@@ -297,15 +325,29 @@ export default function OrdersPage() {
   const handleDeleteOrder = async (id: string) => {
     if (confirm("Bu siparişi silmek istediğinizden emin misiniz?")) {
       try {
-        const response = await fetch(`http://localhost:5088/api/orders/${id}`, {
-          method: "DELETE",
-        });
+              const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`http://localhost:5088/api/orders/${id}`, {
+        method: "DELETE",
+        headers,
+      });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message || `API hatası: ${response.status} ${response.statusText}`
-          );
+          let errorMessage = `API hatası: ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (jsonError) {
+            // JSON parse hatası durumunda status text'i kullan
+            errorMessage = response.statusText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         setOrders(orders.filter((o) => o.id !== id));
@@ -321,21 +363,35 @@ export default function OrdersPage() {
     }
   };
 
-  const handleApproveOrder = async (id: string) => {
+    const handleApproveOrder = async (id: string) => {
     if (confirm("Bu siparişi onaylamak istediğinizden emin misiniz?")) {
       try {
-        const response = await fetch(
-          `http://localhost:5088/api/orders/${id}/approve`,
-          {
-            method: "POST",
-          }
-        );
+        const headers: HeadersInit = {
+          "Content-Type": "application/json",
+        };
+        
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+      const response = await fetch(
+        `http://localhost:5088/api/orders/${id}/approve`,
+        {
+          method: "POST",
+          headers,
+        }
+      );
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message || `API hatası: ${response.status}`
-          );
+          let errorMessage = `API hatası: ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (jsonError) {
+            // JSON parse hatası durumunda status text'i kullan
+            errorMessage = response.statusText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         // Sipariş listesini güncelle
@@ -355,21 +411,35 @@ export default function OrdersPage() {
     }
   };
 
-  const handleRejectOrder = async (id: string) => {
+    const handleRejectOrder = async (id: string) => {
     if (confirm("Bu siparişi reddetmek istediğinizden emin misiniz?")) {
       try {
-        const response = await fetch(
-          `http://localhost:5088/api/orders/${id}/reject`,
-          {
-            method: "POST",
-          }
-        );
+        const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `http://localhost:5088/api/orders/${id}/reject`,
+        {
+          method: "POST",
+          headers,
+        }
+      );
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message || `API hatası: ${response.status}`
-          );
+          let errorMessage = `API hatası: ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (jsonError) {
+            // JSON parse hatası durumunda status text'i kullan
+            errorMessage = response.statusText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         // Sipariş listesini güncelle
