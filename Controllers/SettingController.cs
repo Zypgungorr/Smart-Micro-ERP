@@ -14,7 +14,6 @@ public class SettingController : ControllerBase
         _context = context;
     }
 
-    // Tüm ayarları getir
     [AllowAnonymous]
     [HttpGet]
     public IActionResult GetAll()
@@ -22,7 +21,6 @@ public class SettingController : ControllerBase
         return Ok(_context.Settings.ToList());
     }
 
-    // Belirli bir ayarı getir
     [AllowAnonymous]
     [HttpGet("{key}")]
     public IActionResult Get(string key)
@@ -31,7 +29,6 @@ public class SettingController : ControllerBase
         return setting == null ? NotFound() : Ok(setting);
     }
 
-    // Yeni ayar ekle
     [AllowAnonymous]
     [HttpPost]
     public IActionResult Create([FromBody] Setting setting)
@@ -48,7 +45,6 @@ public class SettingController : ControllerBase
         return CreatedAtAction(nameof(Get), new { key = setting.Key }, setting);
     }
 
-    // Var olan ayarı güncelle
     [AllowAnonymous]
     [HttpPut("{key}")]
     public IActionResult Update(string key, [FromBody] Setting updated)
@@ -62,7 +58,6 @@ public class SettingController : ControllerBase
         return NoContent();
     }
 
-    // Ayarı sil (isteğe bağlı)
     [AllowAnonymous]
     [HttpDelete("{key}")]
     public IActionResult Delete(string key)

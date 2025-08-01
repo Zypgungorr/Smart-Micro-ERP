@@ -28,12 +28,10 @@ export default function PaymentsPage() {
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [modalMounted, setModalMounted] = useState(false);
 
-  // Filtreler
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [selectedDateRange, setSelectedDateRange] = useState("");
 
-  // Modal için ayrı mounted state
   useEffect(() => {
     if (showAddModal || editingPayment) {
       setModalMounted(true);
@@ -42,12 +40,10 @@ export default function PaymentsPage() {
     }
   }, [showAddModal, editingPayment]);
 
-  // Hydration için mounted state
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Ödemeleri çek
   useEffect(() => {
     if (!mounted) return;
 
@@ -78,7 +74,6 @@ export default function PaymentsPage() {
     fetchPayments();
   }, [mounted]);
 
-  // Filtrelenmiş ödemeler
   const filteredPayments = payments.filter((payment) => {
     const matchesSearch = searchTerm === "" || 
       (payment.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -113,7 +108,6 @@ export default function PaymentsPage() {
     return matchesSearch && matchesMethod && matchesDate;
   });
 
-  // İstatistikler
   const totalPayments = payments.length;
   const totalAmount = payments.reduce((sum, payment) => sum + payment.amount, 0);
   
@@ -149,7 +143,6 @@ export default function PaymentsPage() {
           const errorData = await response.json();
           errorMessage = errorData.Amount || errorData.InvoiceId || errorData.message || errorMessage;
         } catch (jsonError) {
-          // JSON parse hatası durumunda status text'i kullan
           errorMessage = response.statusText || errorMessage;
         }
         throw new Error(errorMessage);
@@ -185,7 +178,6 @@ export default function PaymentsPage() {
           const errorData = await response.json();
           errorMessage = errorData.Amount || errorData.Id || errorData.message || errorMessage;
         } catch (jsonError) {
-          // JSON parse hatası durumunda status text'i kullan
           errorMessage = response.statusText || errorMessage;
         }
         throw new Error(errorMessage);
@@ -219,7 +211,6 @@ export default function PaymentsPage() {
             const errorData = await response.json();
             errorMessage = errorData.message || errorMessage;
           } catch (jsonError) {
-            // JSON parse hatası durumunda status text'i kullan
             errorMessage = response.statusText || errorMessage;
           }
           throw new Error(errorMessage);
@@ -246,7 +237,6 @@ export default function PaymentsPage() {
     }
   };
 
-  // Hydration sırasında loading göster
   if (!mounted) {
     return (
       <AppWrapper>

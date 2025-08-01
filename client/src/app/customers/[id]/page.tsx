@@ -21,7 +21,7 @@ interface Customer {
   type: string;
   segment: string;
   notes: string;
-  orders: Order[]; // Added orders to Customer interface
+  orders: Order[]; 
 }
 
 interface Order {

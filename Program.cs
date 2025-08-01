@@ -32,6 +32,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<GeminiService>();
+builder.Services.AddScoped<StockAlertService>();
 
 
 var keyBytes = Encoding.UTF8.GetBytes(jwtKey);

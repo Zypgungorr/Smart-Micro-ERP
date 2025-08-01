@@ -47,7 +47,6 @@ namespace AkilliMikroERP.Controllers
             }
             catch (Exception ex)
             {
-                // Hatanın detaylarını logla
                 Console.WriteLine("Register Error: " + ex.ToString());
                 return StatusCode(500, new { message = "Sunucu hatası", details = ex.Message });
             }
@@ -81,8 +80,8 @@ namespace AkilliMikroERP.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Login Error: " + ex.ToString());  // Hata konsola yazılır
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });  // Postman'de hata detayları döner
+                Console.WriteLine("Login Error: " + ex.ToString());  
+                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });  
             }
         }
 
