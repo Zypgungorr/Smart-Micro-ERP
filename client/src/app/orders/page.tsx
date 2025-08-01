@@ -22,7 +22,7 @@ interface Order {
 }
 
 interface Customer {
-  id: string; // Guid olduğu için string olmalı
+  id: string; 
   name: string;
 }
 
@@ -44,7 +44,6 @@ export default function OrdersPage() {
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [modalMounted, setModalMounted] = useState(false);
 
-  // Modal için ayrı mounted state
   useEffect(() => {
     if (showAddModal || editingOrder) {
       setModalMounted(true);
@@ -53,12 +52,10 @@ export default function OrdersPage() {
     }
   }, [showAddModal, editingOrder]);
 
-  // Hydration için mounted state
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Siparişleri çek
   useEffect(() => {
     if (!mounted) return;
 
@@ -89,7 +86,6 @@ export default function OrdersPage() {
     fetchOrders();
   }, [mounted]);
 
-  // Müşterileri çek
   useEffect(() => {
     if (!mounted) return;
 
@@ -118,7 +114,6 @@ export default function OrdersPage() {
     fetchCustomers();
   }, [mounted]);
 
-  // Ürünleri çek
   useEffect(() => {
     if (!mounted) return;
 
@@ -199,7 +194,6 @@ export default function OrdersPage() {
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
         } catch (jsonError) {
-          // JSON parse hatası durumunda status text'i kullan
           errorMessage = response.statusText || errorMessage;
         }
         throw new Error(errorMessage);
@@ -207,7 +201,6 @@ export default function OrdersPage() {
 
       const createdOrder = await response.json();
       
-      // Yeni siparişi listeye ekle
       const newOrder: Order = {
         id: createdOrder.id,
         orderNumber: createdOrder.orderNumber,
@@ -231,35 +224,30 @@ export default function OrdersPage() {
 
   const handleEditOrder = async (orderData: any) => {
     try {
-      // Sipariş ID'sini kontrol et
       if (!orderData.id) {
         alert("Sipariş ID'si bulunamadı!");
         return;
       }
 
-      // Müşteri ID'sini kontrol et
       if (!orderData.customerId || orderData.customerId === "") {
         alert("Müşteri seçimi zorunludur!");
         return;
       }
 
-      // Müşteri ID'si zaten string (GUID) formatında
       const customerId = orderData.customerId;
 
-      // Müşteri adını bul (string karşılaştırması)
       const customer = customers.find(cus => cus.id === customerId);
       if (!customer) {
         alert("Müşteri bulunamadı!");
         return;
       }
 
-      // Toplam tutarı hesapla
       const totalAmount = orderData.items.reduce((total: number, item: any) => total + (item.totalPrice || 0), 0);
       
       const orderToUpdate = {
         id: orderData.id,
         orderNumber: orderData.orderNumber,
-        customerId: customerId, // GUID string olarak
+        customerId: customerId, 
         orderDate: orderData.orderDate,
         totalAmount: totalAmount,
         paymentStatus: orderData.paymentStatus,
@@ -292,19 +280,17 @@ export default function OrdersPage() {
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
         } catch (jsonError) {
-          // JSON parse hatası durumunda status text'i kullan
           errorMessage = response.statusText || errorMessage;
         }
         throw new Error(errorMessage);
       }
 
-      // Güncellenmiş siparişi listeye ekle
       const updatedOrder: Order = {
         id: orderData.id,
         orderNumber: orderData.orderNumber,
-        customerName: customer.name, // Müşteri adını doğru şekilde set et
+        customerName: customer.name, 
         orderDate: orderData.orderDate,
-        totalAmount: totalAmount, // Hesaplanan toplam tutarı kullan
+        totalAmount: totalAmount, 
         status: orderData.status || "hazırlanıyor",
         paymentStatus: orderData.paymentStatus,
         shippingStatus: orderData.shippingStatus,
@@ -344,7 +330,6 @@ export default function OrdersPage() {
             const errorData = await response.json();
             errorMessage = errorData.message || errorMessage;
           } catch (jsonError) {
-            // JSON parse hatası durumunda status text'i kullan
             errorMessage = response.statusText || errorMessage;
           }
           throw new Error(errorMessage);
@@ -388,13 +373,11 @@ export default function OrdersPage() {
             const errorData = await response.json();
             errorMessage = errorData.message || errorMessage;
           } catch (jsonError) {
-            // JSON parse hatası durumunda status text'i kullan
             errorMessage = response.statusText || errorMessage;
           }
           throw new Error(errorMessage);
         }
 
-        // Sipariş listesini güncelle
         setOrders(orders.map((order) =>
           order.id === id ? { ...order, status: "onaylandı" } : order
         ));
@@ -436,13 +419,11 @@ export default function OrdersPage() {
             const errorData = await response.json();
             errorMessage = errorData.message || errorMessage;
           } catch (jsonError) {
-            // JSON parse hatası durumunda status text'i kullan
             errorMessage = response.statusText || errorMessage;
           }
           throw new Error(errorMessage);
         }
 
-        // Sipariş listesini güncelle
         setOrders(orders.map((order) =>
           order.id === id ? { ...order, status: "iptal" } : order
         ));
@@ -459,7 +440,6 @@ export default function OrdersPage() {
     }
   };
 
-  // Hydration sırasında loading göster
   if (!mounted) {
     return (
       <div className="flex items-center justify-center min-h-screen">

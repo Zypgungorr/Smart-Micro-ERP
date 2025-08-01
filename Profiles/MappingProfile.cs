@@ -8,7 +8,6 @@ namespace AkilliMikroERP.Profiles
     {
         public MappingProfile()
         {
-            // Order mappings
             CreateMap<OrderCreateDto, Order>();
             CreateMap<OrderUpdateDto, Order>();
 
@@ -23,10 +22,9 @@ namespace AkilliMikroERP.Profiles
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : null))
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Quantity * src.UnitPrice));
 
-            // Invoice mappings
             CreateMap<InvoiceCreateDto, Invoice>()
                 .ForMember(dest => dest.InvoiceDate, opt => opt.MapFrom(_ => DateTimeOffset.UtcNow))
-                .ForMember(dest => dest.Items, opt => opt.Ignore()); // manual
+                .ForMember(dest => dest.Items, opt => opt.Ignore()); 
 
             CreateMap<InvoiceItemCreateDto, InvoiceItem>()
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Quantity * src.UnitPrice));
@@ -38,7 +36,6 @@ namespace AkilliMikroERP.Profiles
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : null))
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Quantity * src.UnitPrice));
 
-            // Customer -> CustomerDetailWithOrdersDto
             CreateMap<Customer, CustomerDetailWithOrdersDto>()
                 .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src.Orders));
         }

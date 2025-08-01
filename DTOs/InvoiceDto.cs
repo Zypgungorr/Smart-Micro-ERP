@@ -34,14 +34,6 @@ namespace AkilliMikroERP.Dtos
         public decimal TotalPrice { get; set; }
     }
 
-    // public class InvoiceReadDto
-    // {
-    //     public Guid Id { get; set; }
-    //     public Guid OrderId { get; set; }
-    //     public DateTimeOffset InvoiceDate { get; set; }
-    //     public decimal TotalAmount { get; set; }
-    //     public List<InvoiceItemReadDto> Items { get; set; } = new();
-    // }
     
     public class InvoiceReadDto
 {

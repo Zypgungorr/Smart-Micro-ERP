@@ -1,4 +1,3 @@
-// app/register/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -61,12 +60,10 @@ export default function RegisterPage() {
             <h1 className="text-3xl font-bold text-gray-900">Smart Micro ERP</h1>
           </div>
 
-          {/* Ana Başlık */}
           <h2 className="text-2xl font-semibold text-gray-800 mb-8">
             Hesabınızı Oluşturun:
           </h2>
 
-          {/* Özellikler */}
           <div className="space-y-6">
             <div className="flex items-start space-x-4">
               <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
@@ -107,10 +104,10 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Sağ Taraf - Register Formu */}
+
       <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          {/* Dil Seçici */}
+
           <div className="flex justify-end mb-8">
             <div className="relative">
               <select
@@ -119,17 +116,15 @@ export default function RegisterPage() {
                 className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 <option value="Türkçe">🇹🇷 Türkçe</option>
-                <option value="English">🇺🇸 English</option>
-                <option value="Deutsch">🇩🇪 Deutsch</option>
+                {/* <option value="English">🇺🇸 English</option>
+                <option value="Deutsch">🇩🇪 Deutsch</option> */}
               </select>
               <Globe className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
           </div>
 
-          {/* Form Başlığı */}
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Kayıt Ol</h1>
 
-          {/* Register Formu */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Ad Soyad */}
             <div>

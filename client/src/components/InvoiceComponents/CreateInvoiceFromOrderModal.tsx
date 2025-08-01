@@ -11,7 +11,7 @@ interface Order {
   orderDate: string;
   status: string;
   items: OrderItem[];
-  hasInvoice?: boolean; // Fatura var mı kontrolü
+  hasInvoice?: boolean; 
 }
 
 interface OrderItem {
@@ -50,12 +50,12 @@ export default function CreateInvoiceFromOrderModal({
       const response = await fetch("http://localhost:5088/api/orders");
       if (response.ok) {
         const data = await response.json();
-        // Sadece kargoya verilmiş siparişleri göster
+    
         const shippedOrders = data.filter((order: Order) => 
           order.status === "kargoya_verildi"
         );
         
-        // Her sipariş için fatura kontrolü yap
+  
         const ordersWithInvoiceInfo = await Promise.all(
           shippedOrders.map(async (order: Order) => {
             try {

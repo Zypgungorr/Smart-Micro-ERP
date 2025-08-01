@@ -24,7 +24,7 @@ namespace AkilliMikroERP.Controllers
             _geminiService = geminiService;
         }
 
-        // Kullanıcı ID'sini JWT token'dan al
+        // kullanıcı ıd sini JWT token'dan al
         private Guid? GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -134,7 +134,7 @@ namespace AkilliMikroERP.Controllers
             return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
         }
 
-                // PUT api/products/{id}
+        // PUT api/products/{id}
         [HttpPut("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)

@@ -48,16 +48,14 @@ export default function PaymentForm({
   const [loading, setLoading] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
-  // Faturaları çek
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
         const response = await fetch("http://localhost:5088/api/invoice");
         if (response.ok) {
           const data = await response.json();
-          console.log("Gelen faturalar:", data); // Debug için
           console.log("Fatura durumları:", data.map((inv: Invoice) => ({ id: inv.id, status: inv.status })));
-          // Sadece ödenmemiş ve kısmi ödenmiş faturaları göster (case-insensitive)
+          // Sadece ödenmemiş ve kısmi ödenmiş faturaları göster 
           const unpaidInvoices = data.filter((invoice: Invoice) => {
             const status = invoice.status.toLowerCase();
             return status === "ödenmedi" || 
@@ -76,7 +74,6 @@ export default function PaymentForm({
     }
   }, [isOpen]);
 
-  // Form verilerini güncelle
   useEffect(() => {
     if (payment) {
       setFormData({
@@ -99,20 +96,17 @@ export default function PaymentForm({
     }
   }, [payment]);
 
-  // Seçili fatura değiştiğinde kalan borç miktarını hesapla
   useEffect(() => {
     if (formData.invoiceId) {
       const invoice = invoices.find(inv => inv.id === formData.invoiceId);
       setSelectedInvoice(invoice || null);
       
       if (invoice) {
-        // Kalan borç miktarını backend'den al
         fetchRemainingAmount(invoice.id);
       }
     }
   }, [formData.invoiceId, invoices]);
 
-  // Kalan borç miktarını backend'den al
   const fetchRemainingAmount = async (invoiceId: string) => {
     try {
       console.log(`Kalan borç hesaplanıyor, fatura ID: ${invoiceId}`);
@@ -133,7 +127,7 @@ export default function PaymentForm({
       }
     } catch (error) {
       console.error("Kalan borç hesaplanırken hata:", error);
-      // Hata durumunda toplam tutarı kullan
+    
       const invoice = invoices.find(inv => inv.id === invoiceId);
       if (invoice) {
         setFormData(prev => ({
@@ -154,7 +148,6 @@ export default function PaymentForm({
         paymentDate: new Date(formData.paymentDate).toISOString(),
       };
 
-      // ID varsa güncelleme, yoksa yeni oluşturma
       if (formData.id) {
         submitData.id = formData.id;
       }
@@ -204,7 +197,7 @@ export default function PaymentForm({
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-                disabled={!!payment} // Düzenleme sırasında fatura değiştirilemez
+                disabled={!!payment} // düzenleme sırasında fatura değiştirilemez!
               >
                 <option value="">Fatura seçin</option>
                 {invoices.map((invoice) => (

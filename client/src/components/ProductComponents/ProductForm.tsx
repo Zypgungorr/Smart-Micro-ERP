@@ -42,11 +42,11 @@ export default function ProductForm({
     name: "",
     description: "",
     aiDescription: "",
-    price: 0, // Satış fiyatı
-    purchasePrice: 0, // Alış fiyatı
+    price: 0, 
+    purchasePrice: 0, 
     stock: 0,
     stockCritical: 10,
-    monthlySales: 0, // Aylık satış
+    monthlySales: 0, 
     category: "",
     sku: "",
     status: "active" as "active" | "inactive",
@@ -59,18 +59,17 @@ export default function ProductForm({
   const [estimatedStockOutDays, setEstimatedStockOutDays] = useState<number | null>(null);
   const mounted = useHydration();
 
-  // Form data'yı sadece client-side'da set et
   useEffect(() => {
     if (product && mounted) {
       setFormData({
         name: product.name || "",
         description: product.description || "",
-        aiDescription: "", // AI description'ı ayrı tutuyoruz
+        aiDescription: "", 
         price: product.priceSale || 0,
-        purchasePrice: product.priceSale ? product.priceSale * 0.7 : 0, // Alış fiyatı satış fiyatının %70'i
+        purchasePrice: product.priceSale ? product.priceSale * 0.7 : 0, 
         stock: product.stockQuantity || 0,
         stockCritical: product.stockCritical || 10,
-        monthlySales: 0, // Aylık satış verisi yoksa 0
+        monthlySales: 0, 
         category: product.categoryName || "",
         sku: product.sku || "",
         status: product.status || "active",
@@ -78,7 +77,7 @@ export default function ProductForm({
     }
   }, [product, mounted]);
 
-  // Kategorileri çek
+
   useEffect(() => {
     if (!mounted) return;
 
@@ -148,7 +147,6 @@ export default function ProductForm({
       const data = await response.json();
       setSuggestedPrice(data.suggestedPrice);
       
-      // Fiyat aralığını da al (eğer varsa)
       if (data.priceRange) {
         setPriceRange(data.priceRange);
       }
@@ -198,7 +196,6 @@ export default function ProductForm({
     }
   };
 
-  // Hydration sırasında loading göster
   if (!mounted) {
     return (
       <div className="flex items-center justify-center py-8">

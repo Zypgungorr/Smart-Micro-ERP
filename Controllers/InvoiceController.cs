@@ -83,8 +83,6 @@ namespace AkilliMikroERP.Controllers
         {
             try
             {
-                // Yeni fatura için Order kontrolü yapma (manuel fatura oluşturma için)
-                // Sadece OrderId varsa ve boş değilse kontrol et
                 if (invoiceDto.OrderId.HasValue && invoiceDto.OrderId.Value != Guid.Empty)
                 {
                     var orderExists = await _context.Orders.AnyAsync(o => o.Id == invoiceDto.OrderId.Value);
@@ -94,16 +92,13 @@ namespace AkilliMikroERP.Controllers
                     }
             }
 
-            // DTO'dan Entity'ye map et
             var invoice = _mapper.Map<Invoice>(invoiceDto);
 
-                // OrderId null ise boş GUID ata
                 if (!invoiceDto.OrderId.HasValue || invoiceDto.OrderId.Value == Guid.Empty)
                 {
                     invoice.OrderId = null;
                 }
 
-                // CustomerId'yi ayarla
                 if (invoiceDto.CustomerId.HasValue && invoiceDto.CustomerId.Value != Guid.Empty)
                 {
                     invoice.CustomerId = invoiceDto.CustomerId.Value;
@@ -113,7 +108,6 @@ namespace AkilliMikroERP.Controllers
                     return BadRequest(new { message = "Manuel fatura oluştururken müşteri seçimi zorunludur." });
                 }
 
-                // Items manuel ekle
             invoice.Items = invoiceDto.Items.Select(itemDto =>
             {
                 var item = _mapper.Map<InvoiceItem>(itemDto);
@@ -154,29 +148,24 @@ namespace AkilliMikroERP.Controllers
         {
             try
             {
-                // URL'den gelen id ile DTO'daki id'yi karşılaştır
                 if (dto.Id.HasValue && dto.Id.Value != id)
                 {
                     return BadRequest(new { message = "URL'deki ID ile gönderilen ID uyuşmuyor." });
                 }
 
-                // Faturayı yeniden yükle
             var invoice = await _context.Invoices
                 .Include(i => i.Items)
                 .FirstOrDefaultAsync(i => i.Id == id);
 
             if (invoice == null) return NotFound();
 
-                // Transaction kullanarak güvenli güncelleme
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
 
-            // Mevcut itemları temizle
             _context.InvoiceItems.RemoveRange(invoice.Items);
-            await _context.SaveChangesAsync(); // Önce itemları kaydet
+            await _context.SaveChangesAsync(); 
 
-            // Yeni itemları ekle
             var newItems = dto.Items.Select(itemDto => new InvoiceItem
                 {
                     Id = Guid.NewGuid(),
@@ -189,18 +178,15 @@ namespace AkilliMikroERP.Controllers
 
             _context.InvoiceItems.AddRange(newItems);
 
-            // Fatura bilgilerini güncelle
             invoice.InvoiceNumber = dto.InvoiceNumber;
             invoice.Status = dto.Status;
             invoice.TotalAmount = newItems.Sum(i => i.TotalPrice);
             
-            // CustomerId'yi güncelle (sadece geçerli bir değer varsa)
             if (dto.CustomerId.HasValue && dto.CustomerId.Value != Guid.Empty)
             {
                 invoice.CustomerId = dto.CustomerId.Value;
             }
             
-            // Tarih alanlarını kontrol et ve güncelle
             if (dto.IssuedAt != default)
             {
             invoice.IssuedAt = dto.IssuedAt.ToUniversalTime();
@@ -218,10 +204,8 @@ namespace AkilliMikroERP.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Transaction'ı commit et
             await transaction.CommitAsync();
 
-            // Güncellenmiş faturayı döndür
             var updatedInvoice = await _context.Invoices
                 .Include(i => i.Items)
                     .ThenInclude(ii => ii.Product)
@@ -288,10 +272,8 @@ namespace AkilliMikroERP.Controllers
                 return BadRequest("Sadece taslak durumundaki faturalar onaylanabilir.");
             }
 
-            // AI destekli kontroller
             var aiRecommendations = await GetAIRecommendations(invoice);
 
-            // Faturayı onayla
             invoice.Status = "Ödenmedi";
             invoice.IssuedAt = DateTimeOffset.UtcNow;
 
@@ -321,13 +303,11 @@ namespace AkilliMikroERP.Controllers
                     return NotFound(new { message = "Sipariş bulunamadı." });
                 }
 
-                // Sipariş durumu kontrolü - sadece kargoya verilmiş siparişlerden fatura oluşturulabilir
                 if (order.Status != "kargoya_verildi")
                 {
                     return BadRequest(new { message = "Sadece kargoya verilmiş siparişlerden fatura oluşturulabilir." });
                 }
 
-                // Bu siparişe ait fatura var mı kontrol et
                 var existingInvoice = await _context.Invoices
                     .FirstOrDefaultAsync(i => i.OrderId == orderId);
 
@@ -336,7 +316,6 @@ namespace AkilliMikroERP.Controllers
                     return BadRequest(new { message = "Bu siparişe ait zaten bir fatura oluşturulmuş." });
                 }
 
-                // Yeni fatura oluştur
                 var invoice = new Invoice
                 {
                     Id = Guid.NewGuid(),
@@ -351,7 +330,6 @@ namespace AkilliMikroERP.Controllers
                     Items = new List<InvoiceItem>()
                 };
 
-                // Sipariş kalemlerini fatura kalemlerine kopyala
                 foreach (var orderItem in order.Items)
                 {
                     var invoiceItem = new InvoiceItem
@@ -396,7 +374,6 @@ namespace AkilliMikroERP.Controllers
                 return BadRequest("Sadece taslak durumundaki faturalar reddedilebilir.");
             }
 
-            // Fatura öğelerini sil
             _context.InvoiceItems.RemoveRange(invoice.Items);
             _context.Invoices.Remove(invoice);
             await _context.SaveChangesAsync();
@@ -422,7 +399,6 @@ namespace AkilliMikroERP.Controllers
             return Ok(recommendations);
         }
 
-        // AI önerileri alma metodu
         private async Task<List<string>> GetAIRecommendations(Invoice invoice)
         {
             var recommendations = new List<string>();
@@ -510,7 +486,6 @@ namespace AkilliMikroERP.Controllers
             return Ok(result);
         }
 
-        // Benzersiz fatura numarası oluştur
         private async Task<string> GenerateUniqueInvoiceNumber()
         {
             var random = new Random();

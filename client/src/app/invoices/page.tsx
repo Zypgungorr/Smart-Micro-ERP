@@ -43,7 +43,6 @@ export default function InvoicesPage() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [modalMounted, setModalMounted] = useState(false);
 
-  // Modal için ayrı mounted state
   useEffect(() => {
     if (showAddModal || editingInvoice) {
       setModalMounted(true);
@@ -56,7 +55,6 @@ export default function InvoicesPage() {
     setMounted(true);
   }, []);
 
-  // Faturaları çek
   useEffect(() => {
     if (!mounted) return;
 
@@ -153,7 +151,6 @@ export default function InvoicesPage() {
           )
         );
 
-        // AI önerilerini göster
         if (result.aiRecommendations && result.aiRecommendations.length > 0) {
           alert(
             `Fatura onaylandı!\n\nAI Önerileri:\n${result.aiRecommendations.join(
@@ -357,7 +354,6 @@ export default function InvoicesPage() {
         isOpen={showCreateFromOrderModal}
         onClose={() => setShowCreateFromOrderModal(false)}
         onInvoiceCreated={() => {
-          // Fatura listesini yenile
           window.location.reload();
         }}
       />

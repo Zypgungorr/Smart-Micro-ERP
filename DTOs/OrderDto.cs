@@ -1,6 +1,5 @@
 namespace AkilliMikroERP.Dtos
 {
-    // Sipariş oluşturmak için
     public class OrderCreateDto
     {
         public Guid CustomerId { get; set; }
@@ -15,7 +14,6 @@ namespace AkilliMikroERP.Dtos
         public decimal UnitPrice { get; set; }
     }
 
-    // Sipariş güncellemek için
     public class OrderUpdateDto
     {
         public string Status { get; set; } = "hazırlanıyor";
@@ -25,7 +23,6 @@ namespace AkilliMikroERP.Dtos
         public List<OrderItemCreateDto> Items { get; set; } = new();
     }
 
-    // Sipariş okuma için
     public class OrderItemReadDto
     {
         public Guid ProductId { get; set; }
