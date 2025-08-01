@@ -7,6 +7,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  roleId: number;
 }
 
 interface AuthContextType {
@@ -15,6 +16,8 @@ interface AuthContextType {
   login: (token: string, user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  hasRole: (role: string) => boolean;
+  hasAnyRole: (roles: string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,12 +60,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
   };
 
+  const hasRole = (role: string) => user?.role === role;
+  const hasAnyRole = (roles: string[]) => roles.includes(user?.role || '');
+
   const value = {
     user,
     token,
     login,
     logout,
     isAuthenticated: !!token,
+    hasRole,
+    hasAnyRole,
   };
 
   if (isLoading) {

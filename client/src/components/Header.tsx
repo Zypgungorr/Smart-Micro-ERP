@@ -18,7 +18,6 @@ export default function Header() {
     setMounted(true);
   }, []);
 
-  // Dropdown dışına tıklandığında kapatma
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -39,24 +38,13 @@ export default function Header() {
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-      {/* Logo */}
       <div className="flex items-center space-x-2">
         {mounted && (
-          // <Image
-          //   src="/logo.png"
-          //   alt="Logo"
-          //   width={32}
-          //   height={32}
-          //   className="h-6 w-auto"
-          //   priority
-          // />
           <span className="font-serif text-2xl">SMART MICRO ERP</span>
         )}
       </div>
 
-      {/* Sağ taraf kontrolleri */}
       <div className="flex items-center space-x-4">
-        {/* Dil seçimi */}
         <div className="relative">
           <select
             value={language}
@@ -84,14 +72,6 @@ export default function Header() {
           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
 
-        {/* Add Custom Features butonu */}
-        <button className="relative bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
-          Özel Özellik Ekle
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            1
-          </span>
-        </button>
-
         {/* Kullanıcı profili dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -106,7 +86,6 @@ export default function Header() {
           {/* Dropdown menü */}
           {showProfileDropdown && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-              {/* Kullanıcı bilgileri */}
               <div className="p-4 border-b border-gray-100">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
@@ -125,8 +104,7 @@ export default function Header() {
                   </div>
                 </div>
               </div>
-
-              {/* Menü seçenekleri */}
+              
               <div className="py-2">
                 <Link href="/profile">
                   <button className="w-full flex items-center space-x-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors">

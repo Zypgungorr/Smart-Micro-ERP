@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import AppWrapper from "@/components/AppWrapper";
+import { useAuth } from "@/lib/context/AuthContext";
 import PaymentTable from "@/components/PaymentComponents/PaymentTable";
 import PaymentForm from "@/components/PaymentComponents/PaymentForm";
 import PaymentStats from "@/components/PaymentComponents/PaymentStats";
@@ -19,6 +20,7 @@ interface Payment {
 }
 
 export default function PaymentsPage() {
+  const { hasAnyRole } = useAuth();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -247,24 +249,37 @@ export default function PaymentsPage() {
   // Hydration sırasında loading göster
   if (!mounted) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
+      <AppWrapper>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Ödemeler yükleniyor...</p>
+          </div>
+        </div>
+      </AppWrapper>
     );
   }
 
   return (
     <AppWrapper>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Ödemeler</h1>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Yeni Ödeme</span>
-          </button>
+      <div className="space-y-6">
+        {/* Başlık */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Ödemeler
+            </h1>
+            <p className="text-gray-600 mt-1">Ödeme yönetimi ve takibi</p>
+          </div>
+          {hasAnyRole(["Muhasebeci", "Admin"]) && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Yeni Ödeme</span>
+            </button>
+          )}
         </div>
 
         {/* İstatistikler */}
@@ -291,6 +306,8 @@ export default function PaymentsPage() {
           loading={loading}
           onEdit={setEditingPayment}
           onDelete={handleDeletePayment}
+          canEdit={hasAnyRole(["Muhasebeci", "Admin"])}
+          canDelete={hasAnyRole(["Muhasebeci", "Admin"])}
         />
 
         {/* Ödeme Formu Modal */}

@@ -1,7 +1,7 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, Filter } from "lucide-react";
-import { Plus, Loader2, FileText, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Loader2, FileText, CheckCircle, XCircle, DollarSign } from "lucide-react";
 
 interface InvoiceItem {
   productId: string;
@@ -29,7 +29,7 @@ interface InvoiceStatsProps {
 
 export default function InvoiceStats({ invoices }: InvoiceStatsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
     <div className="bg-white p-4 rounded-lg shadow">
       <div className="flex items-center">
         <div className="p-2 bg-yellow-100 rounded-lg">
@@ -52,7 +52,7 @@ export default function InvoiceStats({ invoices }: InvoiceStatsProps) {
         <div className="ml-4">
           <p className="text-sm font-medium text-gray-600">Ödenmedi</p>
           <p className="text-2xl font-bold text-gray-900">
-            {invoices.filter((i) => i.status === "ödenmedi").length}
+            {invoices.filter((i) => i.status.toLowerCase() === "ödenmedi").length}
           </p>
         </div>
       </div>
@@ -66,7 +66,21 @@ export default function InvoiceStats({ invoices }: InvoiceStatsProps) {
         <div className="ml-4">
           <p className="text-sm font-medium text-gray-600">Ödendi</p>
           <p className="text-2xl font-bold text-gray-900">
-            {invoices.filter((i) => i.status === "ödendi").length}
+            {invoices.filter((i) => i.status.toLowerCase() === "ödendi").length}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div className="bg-white p-4 rounded-lg shadow">
+      <div className="flex items-center">
+        <div className="p-2 bg-orange-100 rounded-lg">
+          <DollarSign className="w-6 h-6 text-orange-600" />
+        </div>
+        <div className="ml-4">
+          <p className="text-sm font-medium text-gray-600">Kısmi Ödendi</p>
+          <p className="text-2xl font-bold text-gray-900">
+            {invoices.filter((i) => i.status.toLowerCase() === "kısmi ödendi").length}
           </p>
         </div>
       </div>

@@ -54,6 +54,7 @@ export default function ProductForm({
   const [categories, setCategories] = useState<Category[]>([]);
   const [isGeneratingPrice, setIsGeneratingPrice] = useState(false);
   const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number } | null>(null);
   const [isGeneratingStockEstimate, setIsGeneratingStockEstimate] = useState(false);
   const [estimatedStockOutDays, setEstimatedStockOutDays] = useState<number | null>(null);
   const mounted = useHydration();
@@ -146,6 +147,11 @@ export default function ProductForm({
 
       const data = await response.json();
       setSuggestedPrice(data.suggestedPrice);
+      
+      // Fiyat aralığını da al (eğer varsa)
+      if (data.priceRange) {
+        setPriceRange(data.priceRange);
+      }
     } catch (error) {
       console.error("Fiyat önerisi alınırken hata:", error);
       alert("Fiyat önerisi alınırken bir hata oluştu!");
@@ -352,7 +358,19 @@ export default function ProductForm({
             <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-green-700">
-                  Önerilen: <strong>{suggestedPrice.toFixed(2)} ₺</strong>
+                  {priceRange ? (
+                    <>
+                      Önerilen Aralık: <strong>{priceRange.min.toLocaleString()} - {priceRange.max.toLocaleString()} ₺</strong>
+                      <br />
+                      <span className="text-xs text-gray-600">
+                        Ortalama: {suggestedPrice.toLocaleString()} ₺
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Önerilen: <strong>{suggestedPrice.toLocaleString()} ₺</strong>
+                    </>
+                  )}
                 </span>
                 <button
                   type="button"

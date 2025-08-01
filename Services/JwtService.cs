@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using AkilliMikroERP.Models;
 
 namespace AkilliMikroERP.Services
 {
@@ -20,12 +22,17 @@ namespace AkilliMikroERP.Services
             _audience = configuration["Jwt:Audience"] ?? throw new ArgumentNullException("Jwt:Audience");
         }
 
-        public string GenerateToken(Guid userId, string role)
+        public string GenerateToken(User user)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-                new Claim(ClaimTypes.Role, role),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name ?? ""),
+                new Claim(ClaimTypes.Email, user.Email ?? ""),
+                new Claim(ClaimTypes.Role, user.Role?.Name ?? ""),
+                new Claim("RoleId", user.RoleId.ToString()),
+                new Claim("Permissions", user.Role?.Permissions ?? "[]"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

@@ -134,7 +134,7 @@ namespace AkilliMikroERP.Controllers
             return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
         }
 
-        // PUT api/products/{id}
+                // PUT api/products/{id}
         [HttpPut("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)
@@ -165,7 +165,7 @@ namespace AkilliMikroERP.Controllers
 
         // DELETE api/products/{id}
         [HttpDelete("{id}")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> Delete(Guid id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -189,11 +189,16 @@ namespace AkilliMikroERP.Controllers
                     return BadRequest("Ürün adı ve kategori gereklidir.");
                 }
 
-                var suggestedPrice = await _geminiService.GetSuggestedPrice(
+                var (suggestedPrice, priceRange) = await _geminiService.GetSuggestedPrice(
                     productName, 
                     category, 
                     purchasePrice ?? 0
                 );
+
+                if (priceRange.HasValue)
+                {
+                    return Ok(new { suggestedPrice, priceRange = new { min = priceRange.Value.Min, max = priceRange.Value.Max } });
+                }
 
                 return Ok(new { suggestedPrice });
             }

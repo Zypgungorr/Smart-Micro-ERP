@@ -70,7 +70,7 @@ public class PaymentController : ControllerBase
 
     // GET: api/payment/invoice/{invoiceId}
     [HttpGet("invoice/{invoiceId}")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<PaymentReadDto>>> GetByInvoice(Guid invoiceId)
     {
         var payments = await _context.Payments

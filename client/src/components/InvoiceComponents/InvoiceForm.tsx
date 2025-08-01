@@ -35,7 +35,7 @@ interface Invoice {
 interface Product {
   id: string;
   name: string;
-  price: number;
+  priceSale: number;
 }
 
 interface Customer {
@@ -77,7 +77,8 @@ export default function InvoiceForm({
   const [newItem, setNewItem] = useState({
     productId: "",
     quantity: 1,
-    unitPrice: 0
+    unitPrice: 0,
+    totalPrice: 0
   });
 
   useEffect(() => {
@@ -150,7 +151,8 @@ export default function InvoiceForm({
     setNewItem({
       productId: "",
       quantity: 1,
-      unitPrice: 0
+      unitPrice: 0,
+      totalPrice: 0
     });
   };
 
@@ -165,10 +167,20 @@ export default function InvoiceForm({
 
   const handleProductChange = (productId: string) => {
     const product = products.find(p => p.id === productId);
+    const unitPrice = product?.priceSale || 0;
     setNewItem(prev => ({
       ...prev,
       productId,
-      unitPrice: product?.price || 0
+      unitPrice,
+      totalPrice: unitPrice * prev.quantity
+    }));
+  };
+
+  const handleQuantityChange = (quantity: number) => {
+    setNewItem(prev => ({
+      ...prev,
+      quantity,
+      totalPrice: prev.unitPrice * quantity
     }));
   };
 
@@ -341,7 +353,7 @@ export default function InvoiceForm({
             <input
               type="number"
               value={newItem.quantity}
-              onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 0 })}
+              onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 0)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="1"
             />

@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [roleId, setRoleId] = useState(2); 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,7 +31,7 @@ export default function RegisterPage() {
       const res = await fetch("http://localhost:5088/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, roleId }),
       });
 
       if (res.ok) {
@@ -214,6 +215,25 @@ export default function RegisterPage() {
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+            </div>
+
+            {/* Rol Seçimi */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                * Rol
+              </label>
+              <select
+                value={roleId}
+                onChange={(e) => setRoleId(parseInt(e.target.value))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+                <option value={2}>Ürün Yöneticisi</option>
+                <option value={3}>Satış Temsilcisi</option>
+                <option value={4}>Sipariş Onay Yetkilisi</option>
+                <option value={5}>Depocu</option>
+                <option value={6}>Muhasebeci</option>
+              </select>
             </div>
 
             {/* Kayıt Ol Butonu */}

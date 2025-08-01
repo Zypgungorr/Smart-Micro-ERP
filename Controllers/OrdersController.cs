@@ -252,6 +252,47 @@ namespace AkilliMikroERP.Controllers
             return NoContent();
         }
 
+        // POST: api/orders/{id}/ship
+        [HttpPost("{id}/ship")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ShipOrder(Guid id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+                return NotFound(new { message = "Sipariş bulunamadı." });
+
+            if (order.Status != "onaylandı")
+                return BadRequest(new { message = "Sadece onaylanmış siparişler kargoya verilebilir." });
+
+            order.Status = "kargoya_verildi";
+            order.UpdatedAt = DateTimeOffset.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Sipariş kargoya verildi." });
+        }
+
+        // POST: api/orders/{id}/deliver
+        [HttpPost("{id}/deliver")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DeliverOrder(Guid id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+                return NotFound(new { message = "Sipariş bulunamadı." });
+
+            if (order.Status != "kargoya_verildi")
+                return BadRequest(new { message = "Sadece kargoya verilmiş siparişler teslim edilebilir." });
+
+            order.Status = "teslim_edildi";
+            order.DeliveryDate = DateTimeOffset.UtcNow;
+            order.UpdatedAt = DateTimeOffset.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Sipariş teslim edildi." });
+        }
+
         // DELETE: api/orders/{id}
         [HttpDelete("{id}")]
         [AllowAnonymous]

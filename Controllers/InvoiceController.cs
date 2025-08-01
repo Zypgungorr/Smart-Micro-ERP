@@ -321,6 +321,12 @@ namespace AkilliMikroERP.Controllers
                     return NotFound(new { message = "Sipariş bulunamadı." });
                 }
 
+                // Sipariş durumu kontrolü - sadece kargoya verilmiş siparişlerden fatura oluşturulabilir
+                if (order.Status != "kargoya_verildi")
+                {
+                    return BadRequest(new { message = "Sadece kargoya verilmiş siparişlerden fatura oluşturulabilir." });
+                }
+
                 // Bu siparişe ait fatura var mı kontrol et
                 var existingInvoice = await _context.Invoices
                     .FirstOrDefaultAsync(i => i.OrderId == orderId);

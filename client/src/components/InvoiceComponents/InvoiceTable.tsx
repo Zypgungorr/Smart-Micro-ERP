@@ -33,6 +33,10 @@ interface InvoiceTableProps {
   onDelete: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canApprove?: boolean;
+  canReject?: boolean;
 }
 
 export default function InvoiceTable({
@@ -42,6 +46,10 @@ export default function InvoiceTable({
   onDelete,
   onApprove,
   onReject,
+  canEdit = true,
+  canDelete = true,
+  canApprove = true,
+  canReject = true,
 }: InvoiceTableProps) {
   const router = useRouter();
   const [aiRecommendations, setAiRecommendations] = useState<{[key: string]: string[]}>({});
@@ -245,40 +253,45 @@ export default function InvoiceTable({
                         <Eye className="w-4 h-4" />
                       </button>
                       
-                      <button
-                        onClick={() => onEdit(invoice)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Düzenle"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      
-                      {invoice.status.toLowerCase() === 'taslak' && onApprove && onReject && (
-                        <>
-                          <button
-                            onClick={() => onApprove(invoice.id)}
-                            className="text-green-600 hover:text-green-800"
-                            title="Onayla"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => onReject(invoice.id)}
-                            className="text-red-600 hover:text-red-800"
-                            title="Reddet"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        </>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(invoice)}
+                          className="text-blue-600 hover:text-blue-800"
+                          title="Düzenle"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
                       )}
                       
-                      <button
-                        onClick={() => onDelete(invoice.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Sil"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {invoice.status.toLowerCase() === 'taslak' && onApprove && onReject && canApprove && (
+                        <button
+                          onClick={() => onApprove(invoice.id)}
+                          className="text-green-600 hover:text-green-800"
+                          title="Onayla"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                      
+                      {invoice.status.toLowerCase() === 'taslak' && onApprove && onReject && canReject && (
+                        <button
+                          onClick={() => onReject(invoice.id)}
+                          className="text-red-600 hover:text-red-800"
+                          title="Reddet"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                      
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(invoice.id)}
+                          className="text-red-600 hover:text-red-800"
+                          title="Sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

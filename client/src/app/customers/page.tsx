@@ -6,6 +6,7 @@ import CustomerFilters from "@/components/CustomerComponents/CustomerFilters";
 import CustomerTable from "@/components/CustomerComponents/CustomerTable";
 import CustomerForm from "@/components/CustomerComponents/CustomerForm";
 import AppWrapper from "@/components/AppWrapper";
+import { useAuth } from "@/lib/context/AuthContext";
 
 interface Customer {
   id: number;
@@ -21,6 +22,7 @@ interface Customer {
 }
 
 export default function CustomersPage() {
+  const { hasAnyRole } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -206,13 +208,15 @@ export default function CustomersPage() {
           </h1>
           <p className="text-gray-600 mt-1">Müşteri yönetimi ve takibi</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Yeni Müşteri Ekle</span>
-        </button>
+        {hasAnyRole(["Satış Temsilcisi", "Admin"]) && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Yeni Müşteri Ekle</span>
+          </button>
+        )}
       </div>
 
       {/* Filtreler */}
@@ -227,6 +231,8 @@ export default function CustomersPage() {
         loading={loading}
         onEdit={setEditingCustomer}
         onDelete={handleDeleteCustomer}
+        canEdit={hasAnyRole(["Satış Temsilcisi", "Admin"])}
+        canDelete={hasAnyRole(["Satış Temsilcisi", "Admin"])}
       />
 
       {/* Müşteri Ekleme/Düzenleme Modal */}
