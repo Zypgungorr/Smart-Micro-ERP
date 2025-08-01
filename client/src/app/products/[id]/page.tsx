@@ -33,12 +33,11 @@ export default function ProductDetailPage({ params }: Props) {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  // Hydration için mounted state
+  // Hydration hatası sonrası
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Ürün detaylarını çek
   useEffect(() => {
     if (!mounted) return;
 
@@ -61,7 +60,6 @@ export default function ProductDetailPage({ params }: Props) {
         setProduct(fetchedProduct);
       } catch (error) {
         console.error("Ürün detayını çekerken hata:", error);
-        // Hata durumunda ürünler listesine geri dön
         router.push("/products");
       } finally {
         setLoading(false);
@@ -71,7 +69,6 @@ export default function ProductDetailPage({ params }: Props) {
     fetchProduct();
   }, [id, mounted, router]);
 
-  // Hydration sırasında loading göster
   if (!mounted) {
     return (
       <div className="flex items-center justify-center min-h-screen">

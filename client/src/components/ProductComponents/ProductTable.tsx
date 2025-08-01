@@ -131,9 +131,6 @@ export default function ProductTable({
                       <p className="font-medium text-gray-900">
                         {product.name}
                       </p>
-                      {/* <p className="text-sm text-gray-500">
-                        {product.description}
-                      </p> */}
                     </div>
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-600">

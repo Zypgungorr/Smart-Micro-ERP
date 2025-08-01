@@ -27,7 +27,7 @@ export default function CustomerForm({ customer, onSubmit, onCancel }: CustomerF
   const mounted = useHydration();
 
   const [formData, setFormData] = useState({
-    id: customer?.id ?? undefined, // id'yi ekledik!
+    id: customer?.id ?? undefined, 
     name: customer?.name || "",
     email: customer?.email || "",
     phone: customer?.phone || "",
@@ -40,7 +40,6 @@ export default function CustomerForm({ customer, onSubmit, onCancel }: CustomerF
   });
 
   useEffect(() => {
-    // Eğer müşteri değişirse formu güncelle (ör: düzenleme modunda farklı müşteri seçilirse)
     setFormData({
       id: customer?.id ?? undefined,
       name: customer?.name || "",
@@ -57,7 +56,6 @@ export default function CustomerForm({ customer, onSubmit, onCancel }: CustomerF
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Sadece güncelleme modunda id kontrolü yap
     if (customer && formData.id === undefined) {
       console.error("Müşteri ID'si tanımlı değil.");
       return;

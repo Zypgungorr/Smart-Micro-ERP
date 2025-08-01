@@ -30,12 +30,11 @@ namespace AkilliMikroERP.Controllers
                 .Include(o => o.Customer)
                 .Include(o => o.Items)
                     .ThenInclude(oi => oi.Product)
-                .Include(o => o.Invoice) // Fatura bilgisini de getir
+                .Include(o => o.Invoice) 
                 .ToListAsync();
 
             var orderDtos = _mapper.Map<List<OrderReadDto>>(orders);
             
-            // Her sipariş için hasInvoice bilgisini ekle
             foreach (var orderDto in orderDtos)
             {
                 var order = orders.FirstOrDefault(o => o.Id == orderDto.Id);
@@ -70,7 +69,6 @@ namespace AkilliMikroERP.Controllers
             var order = _mapper.Map<Order>(orderCreateDto);
             order.OrderDate = DateTimeOffset.UtcNow;
             
-            // Otomatik sipariş numarası üret
             order.OrderNumber = await GenerateUniqueOrderNumber();
 
             if (order.DeliveryDate.HasValue)
@@ -87,13 +85,14 @@ namespace AkilliMikroERP.Controllers
 
             await _context.SaveChangesAsync();
 
+            // sipariş oluşturulduğunda stok düşür
+            await UpdateStockForOrder(order.Items!, false);
+
             var orderReadDto = _mapper.Map<OrderReadDto>(order);
             return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, orderReadDto);
         }
 
 
-
-        // Benzersiz sipariş numarası üretme metodu
         private async Task<string> GenerateUniqueOrderNumber()
         {
             var random = new Random();
@@ -105,11 +104,41 @@ namespace AkilliMikroERP.Controllers
                 // 6 haneli random sayı üret (100000-999999)
                 orderNumber = random.Next(100000, 1000000).ToString();
                 
-                // Veritabanında bu numara var mı kontrol et
                 isUnique = !await _context.Orders.AnyAsync(o => o.OrderNumber == orderNumber);
             } while (!isUnique);
 
             return orderNumber;
+        }
+
+        // Stok güncelleme metodu
+        private async Task UpdateStockForOrder(ICollection<OrderItem> items, bool isReversal = false)
+        {
+            foreach (var item in items)
+            {
+                var product = await _context.Products.FindAsync(item.ProductId);
+                if (product != null)
+                {
+                    if (isReversal)
+                    {
+                        product.StockQuantity += item.Quantity;
+                    }
+                    else
+                    {
+                        if (product.StockQuantity >= item.Quantity)
+                        {
+                            product.StockQuantity -= item.Quantity;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Ürün {product.Name} için yeterli stok yok. Mevcut: {product.StockQuantity}, Gereken: {item.Quantity}");
+                        }
+                    }
+                    
+                    product.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+            
+            await _context.SaveChangesAsync();
         }
 
         // POST: api/orders/{id}/approve - Siparişi onayla
@@ -138,7 +167,6 @@ namespace AkilliMikroERP.Controllers
                 return BadRequest(new { message = "İptal edilmiş sipariş onaylanamaz." });
             }
 
-            // Siparişi onayla
             order.Status = "onaylandı";
             order.ApprovedAt = DateTimeOffset.UtcNow;
 
@@ -177,11 +205,16 @@ namespace AkilliMikroERP.Controllers
                 return BadRequest(new { message = "Bu sipariş zaten iptal edilmiş." });
             }
 
-            // Siparişi reddet
             order.Status = "iptal";
             order.RejectedAt = DateTimeOffset.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            // Sipariş reddedildiğinde stok geri ekle
+            if (order.Items != null && order.Items.Any())
+            {
+                await UpdateStockForOrder(order.Items, true);
+            }
 
             return Ok(new { 
                 message = "Sipariş başarıyla reddedildi.",
@@ -257,7 +290,10 @@ namespace AkilliMikroERP.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ShipOrder(Guid id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.Id == id);
+                
             if (order == null)
                 return NotFound(new { message = "Sipariş bulunamadı." });
 
@@ -302,21 +338,19 @@ namespace AkilliMikroERP.Controllers
             {
                 var order = await _context.Orders
                     .Include(o => o.Items)
-                    .Include(o => o.Invoice) // İlişkili faturayı kontrol et
+                    .Include(o => o.Invoice) 
                     .FirstOrDefaultAsync(o => o.Id == id);
 
                 if (order == null) 
                     return NotFound(new { message = "Sipariş bulunamadı." });
 
-                // İlişkili fatura varsa silmeye izin verme
                 if (order.Invoice != null)
                 {
                     return BadRequest(new { 
                         message = "Bu siparişe bağlı fatura bulunmaktadır. Fatura kesilmiş siparişler silinemez. Siparişi 'İptal Edildi' olarak işaretleyebilirsiniz." 
                     });
                 }
-
-                // Sipariş kalemlerini sil
+                
                 if (order.Items != null && order.Items.Any())
                 {
                     _context.OrderItems.RemoveRange(order.Items);

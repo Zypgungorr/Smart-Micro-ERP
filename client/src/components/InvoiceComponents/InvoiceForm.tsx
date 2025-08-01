@@ -63,7 +63,7 @@ export default function InvoiceForm({
   const [formData, setFormData] = useState({
     id: invoice?.id ?? undefined,
     orderId: invoice?.orderId || "",
-    customerId: "", // Müşteri seçimi için
+    customerId: "", 
     invoiceNumber: invoice?.invoiceNumber || "",
     status: invoice?.status || "taslak",
     issuedAt: invoice?.issuedAt || new Date().toISOString().split('T')[0],
@@ -88,7 +88,7 @@ export default function InvoiceForm({
       setFormData({
         id: invoice.id,
         orderId: invoice.orderId,
-        customerId: "", // Güncelleme modunda müşteri seçimi yok
+        customerId: "", 
         invoiceNumber: invoice.invoiceNumber,
         status: invoice.status,
         issuedAt: invoice.issuedAt.split('T')[0],
@@ -198,8 +198,8 @@ export default function InvoiceForm({
     }
 
     const submitData: any = {
-      orderId: formData.orderId || "00000000-0000-0000-0000-000000000000", // Boş GUID kullan
-      customerId: formData.customerId || null, // Müşteri ID'si - boş string yerine null
+      orderId: formData.orderId || "00000000-0000-0000-0000-000000000000",
+      customerId: formData.customerId || null, 
       invoiceNumber: formData.invoiceNumber,
       status: formData.status,
       issuedAt: new Date(formData.issuedAt).toISOString(),
@@ -213,7 +213,6 @@ export default function InvoiceForm({
       }))
     };
 
-    // Sadece güncelleme modunda id ekle
     if (formData.id) {
       submitData.id = formData.id;
     }

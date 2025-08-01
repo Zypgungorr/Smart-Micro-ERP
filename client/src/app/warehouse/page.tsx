@@ -69,7 +69,7 @@ export default function WarehousePage() {
 
       const result = await response.json();
       alert(result.message);
-      fetchOrders(); // Listeyi yenile
+      fetchOrders(); 
     } catch (error) {
       console.error("Sipariş kargoya verilirken hata:", error);
       alert(`Hata: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
@@ -92,7 +92,7 @@ export default function WarehousePage() {
 
       const result = await response.json();
       alert(result.message);
-      fetchOrders(); // Listeyi yenile
+      fetchOrders(); 
     } catch (error) {
       console.error("Sipariş teslim edilirken hata:", error);
       alert(`Hata: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
@@ -144,7 +144,6 @@ export default function WarehousePage() {
     }).format(amount);
   };
 
-  // Filtrelenmiş siparişler
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -303,7 +302,7 @@ export default function WarehousePage() {
                             <Eye className="w-4 h-4" />
                           </button>
                           
-                          {/* Kargoya Ver Butonu - Sadece onaylanmış siparişler için */}
+                          {/* Kargoya Ver Butonu sadece onaylanmış siparişler için */}
                           {order.status.toLowerCase() === "onaylandı" && hasAnyRole(["Depocu", "Admin"]) && (
                             <button
                               onClick={() => handleShipOrder(order.id)}
@@ -314,7 +313,7 @@ export default function WarehousePage() {
                             </button>
                           )}
                           
-                          {/* Teslim Et Butonu - Sadece kargoya verilmiş siparişler için */}
+                          {/* Teslim Et Butonu sadece kargoya verilmiş siparişler için */}
                           {order.status.toLowerCase() === "kargoya_verildi" && hasAnyRole(["Depocu", "Admin"]) && (
                             <button
                               onClick={() => handleDeliverOrder(order.id)}

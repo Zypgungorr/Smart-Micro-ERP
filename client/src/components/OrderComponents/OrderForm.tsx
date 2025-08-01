@@ -11,15 +11,15 @@ interface OrderFormProps {
 }
 
 interface Customer {
-  id: string; // Guid olduğu için string olmalı
+  id: string; 
   name: string;
 }
 
 interface Product {
   id: number;
   name: string;
-  stock: number;
-  priceSale: number; // Satış fiyatı
+  stockQuantity: number;
+  priceSale: number; 
 }
 
 export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps) {
@@ -28,9 +28,9 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
   const [products, setProducts] = useState<Product[]>([]);
 
   const [formData, setFormData] = useState({
-    id: order?.id || "", // Sipariş ID'si eklendi
+    id: order?.id || "", 
     customerId: order?.customerId || "",
-    customerName: order?.customerName || "", // Müşteri adını da sakla
+    customerName: order?.customerName || "", 
     items: order?.items || [{ productId: "", quantity: 1 }],
     orderDate: order?.orderDate || new Date().toISOString().split("T")[0],
     paymentType: order?.paymentType || "Kredi Kartı",
@@ -58,16 +58,15 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
     fetchProducts();
   }, [mounted]);
 
-  // Güncelleme modunda mevcut sipariş bilgilerini yükle
   useEffect(() => {
     if (order && customers.length > 0) {
-      // Mevcut müşteri ID'sini bul ve set et
+     
       const currentCustomer = customers.find(c => c.name === order.customerName);
       
       if (currentCustomer) {
         setFormData(prev => ({
           ...prev,
-          id: order.id, // Sipariş ID'sini de set et
+          id: order.id, 
           customerId: currentCustomer.id.toString(),
           customerName: currentCustomer.name
         }));
@@ -79,7 +78,6 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
     const newItems = [...formData.items];
     newItems[index][field] = value;
     
-    // Eğer ürün seçildiyse fiyatını da al
     if (field === "productId" && value) {
       const selectedProduct = products.find(p => p.id.toString() === value);
       if (selectedProduct) {
@@ -88,7 +86,6 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
       }
     }
     
-    // Eğer miktar değiştiyse toplam fiyatı güncelle
     if (field === "quantity") {
       const quantity = parseInt(value) || 0;
       newItems[index].quantity = quantity;
@@ -114,6 +111,17 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    for (const item of formData.items) {
+      if (item.productId) {
+        const product = products.find(p => p.id.toString() === item.productId);
+        if (product && item.quantity > product.stockQuantity) {
+          alert(`Yetersiz stok! ${product.name} için mevcut stok: ${product.stockQuantity}, sipariş edilen: ${item.quantity}`);
+          return;
+        }
+      }
+    }
+    
     onSubmit(formData);
   };
 
@@ -170,7 +178,7 @@ export default function OrderForm({ order, onSubmit, onCancel }: OrderFormProps)
               <option value="">Ürün Seçin</option>
               {products.map((p: Product) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} - ₺{p.priceSale} (Stok: {p.stock})
+                  {p.name} - ₺{p.priceSale} (Stok: {p.stockQuantity})
                 </option>
               ))}
             </select>

@@ -102,7 +102,7 @@ export default function InvoiceTable({
   };
 
   const fetchAIRecommendations = async (invoiceId: string) => {
-    if (aiRecommendations[invoiceId]) return; // Zaten yüklenmişse tekrar yükleme
+    if (aiRecommendations[invoiceId]) return; 
     
     setLoadingRecommendations(prev => ({ ...prev, [invoiceId]: true }));
     

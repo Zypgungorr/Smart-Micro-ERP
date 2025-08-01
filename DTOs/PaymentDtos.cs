@@ -38,7 +38,6 @@ namespace AkilliMikroERP.Dtos
         public int PaymentCount { get; set; }
         public bool IsFullyPaid { get; set; }
     }
-    // DTOs/PaymentDto.cs
     public class PaymentCreateDto
     {
         public Guid InvoiceId { get; set; }

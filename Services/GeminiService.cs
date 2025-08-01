@@ -15,19 +15,16 @@ namespace AkilliMikroERP.Services
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly GoogleCredential _googleCredential;
-
-        // Rate limiting için
         private static DateTime _lastRequestTime = DateTime.MinValue;
         private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(10, 10);
         private static int _requestCount = 0;
         private static DateTime _requestCountResetTime = DateTime.UtcNow;
 
 
-        // Limitler (Google'ın güncel gemini-1.5-flash limitlerine göre güncellendi)
-        private readonly TimeSpan _minimumDelay = TimeSpan.FromMilliseconds(60); // 1000 RPM için ~60ms
-        private readonly int _maxRequestsPerMinute = 950; // Google limitinin altında kalmak için
-        private readonly int _maxRequestsPerHour = 50000; // Genellikle daha yüksek olur, Google dokümantasyonuna bakın
-        private readonly int _maxRetries = 3; // Maksimum 3 deneme
+        private readonly TimeSpan _minimumDelay = TimeSpan.FromMilliseconds(60); 
+        private readonly int _maxRequestsPerMinute = 950;
+        private readonly int _maxRequestsPerHour = 50000; 
+        private readonly int _maxRetries = 3;
 
         public GeminiService(IHttpClientFactory httpClientFactory, ApplicationDbContext db)
         {
@@ -52,7 +49,6 @@ namespace AkilliMikroERP.Services
 
         private async Task<string> AskGeminiInternal(string prompt, string model, string type, Guid? relatedId)
         {
-            // Rate limiting kontrolü
             await EnforceRateLimit();
 
             var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
@@ -90,7 +86,6 @@ namespace AkilliMikroERP.Services
             string status = "başarılı";
             string responseString = "";
 
-            // Retry mekanizması
             for (int attempt = 1; attempt <= _maxRetries; attempt++)
             {
                 try
@@ -107,14 +102,13 @@ namespace AkilliMikroERP.Services
 
                     if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                     {
-                        // 429 hatası - Rate limit aşımı
                         var retryAfter = GetRetryAfterDelay(responseString);
                         Console.WriteLine($"Rate limit aşıldı. {retryAfter.TotalSeconds} saniye bekleniyor...");
 
                         if (attempt < _maxRetries)
                         {
                             await Task.Delay(retryAfter);
-                            continue; // Tekrar dene
+                            continue; 
                         }
                         else
                         {
@@ -131,7 +125,6 @@ namespace AkilliMikroERP.Services
                     }
                     else
                     {
-                        // Başarılı yanıt
                         try
                         {
                             var json = JObject.Parse(responseString);
@@ -153,7 +146,7 @@ namespace AkilliMikroERP.Services
                             outputText = "API yanıtı parse edilemedi.";
                             Console.WriteLine($"Parse hatası: {parseEx.Message}");
                         }
-                        break; // Başarılı, döngüyü kır
+                        break; 
                     }
                 }
                 catch (Exception ex)
@@ -162,7 +155,7 @@ namespace AkilliMikroERP.Services
 
                     if (attempt < _maxRetries)
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt))); // Exponential backoff
+                        await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt))); 
                     }
                     else
                     {
@@ -173,10 +166,8 @@ namespace AkilliMikroERP.Services
                 }
             }
 
-            // Request sayısını güncelle
             UpdateRequestCount();
 
-            // AI isteğini kaydet
             var log = new AiLog
             {
                 Model = model,
@@ -198,7 +189,6 @@ namespace AkilliMikroERP.Services
         {
             var now = DateTime.UtcNow;
 
-            // Son istekten bu yana minimum süre geçmişse devam et
             var timeSinceLastRequest = now - _lastRequestTime;
             if (timeSinceLastRequest < _minimumDelay)
             {
@@ -207,7 +197,6 @@ namespace AkilliMikroERP.Services
                 await Task.Delay(delayTime);
             }
 
-            // Request sayısını kontrol et
             if (now - _requestCountResetTime > TimeSpan.FromMinutes(1))
             {
                 _requestCount = 0;
@@ -255,14 +244,12 @@ namespace AkilliMikroERP.Services
             }
             catch
             {
-                // Parse hatası varsa varsayılan değer kullan
+                // catch işlemi için
             }
 
-            // Varsayılan 30 saniye
             return TimeSpan.FromSeconds(30);
         }
 
-        // Quota durumunu kontrol etmek için
         public async Task<object> GetQuotaStatus()
         {
             return new
@@ -306,28 +293,26 @@ namespace AkilliMikroERP.Services
 
                 Sadece 'min-max' formatında döndür. Örnek çıktı: 60000-65000";
 
-                // AI'dan pazar analizi al
+               
                 var response = await AskGemini(prompt, "gemini-1.5-flash", "price_suggestion");
-                
-                // Fiyat aralığını parse et (örn: "60000-65000")
+         
                 var priceRange = ParsePriceRange(response);
                 
                 if (priceRange.HasValue)
                 {
-                    // Ortalama fiyatı döndür
                     var averagePrice = (priceRange.Value.Min + priceRange.Value.Max) / 2;
                     return (averagePrice, priceRange);
                 }
                 
-                // Fallback: Kategori bazlı kar marjı
+                // kategori bazlı kar marjı
                 var fallbackMultiplier = category.ToLower() switch
                 {
-                    "elektronik" => 1.25m, // %25 kar marjı
-                    "giyim" => 1.60m,      // %60 kar marjı
-                    "kitap" => 1.50m,      // %50 kar marjı
-                    "ev & yaşam" => 1.55m, // %55 kar marjı
-                    "spor" => 1.65m,       // %65 kar marjı
-                    _ => 1.40m             // %40 kar marjı (varsayılan)
+                    "elektronik" => 1.25m,
+                    "giyim" => 1.60m,  
+                    "kitap" => 1.50m,     
+                    "ev & yaşam" => 1.55m, 
+                    "spor" => 1.65m,       
+                    _ => 1.40m             
                 };
                 
                 var fallbackPrice = purchasePrice * fallbackMultiplier;
@@ -336,22 +321,21 @@ namespace AkilliMikroERP.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Fiyat önerisi hatası: {ex.Message}");
-                // Fallback: Kategori bazlı kar marjı
+               
                 if (purchasePrice > 0)
                 {
                     var fallbackMultiplier = category.ToLower() switch
                     {
-                        "elektronik" => 1.25m, // %25 kar marjı
-                        "giyim" => 1.60m,      // %60 kar marjı
-                        "kitap" => 1.50m,      // %50 kar marjı
-                        "ev & yaşam" => 1.55m, // %55 kar marjı
-                        "spor" => 1.65m,       // %65 kar marjı
-                        _ => 1.40m             // %40 kar marjı (varsayılan)
+                        "elektronik" => 1.25m, 
+                        "giyim" => 1.60m,      
+                        "kitap" => 1.50m,   
+                        "ev & yaşam" => 1.55m,
+                        "spor" => 1.65m,       
+                        _ => 1.40m           
                     };
                     
                     var result = purchasePrice * fallbackMultiplier;
                     
-                    // Sayı formatını düzelt (56.25 -> 56250)
                     if (result < 1000 && purchasePrice > 1000)
                     {
                         result = result * 1000;
@@ -359,7 +343,7 @@ namespace AkilliMikroERP.Services
                     
                     return (result, null);
                 }
-                return (100m, null); // Varsayılan değer
+                return (100m, null); 
             }
         }
 
@@ -367,7 +351,6 @@ namespace AkilliMikroERP.Services
         {
             try
             {
-                // "60000-65000" formatını ara
                 var match = System.Text.RegularExpressions.Regex.Match(text, @"(\d+)-(\d+)");
                 if (match.Success)
                 {
@@ -387,7 +370,6 @@ namespace AkilliMikroERP.Services
         {
             try
             {
-                // Sayısal değerleri bul
                 var numbers = System.Text.RegularExpressions.Regex.Matches(text, @"\d+[.,]?\d*")
                     .Cast<System.Text.RegularExpressions.Match>()
                     .Select(m => m.Value)
@@ -395,7 +377,6 @@ namespace AkilliMikroERP.Services
 
                 if (numbers.Any())
                 {
-                    // İlk sayıyı al ve decimal'e çevir
                     var firstNumber = numbers.First().Replace(',', '.');
                     if (decimal.TryParse(firstNumber, out decimal result))
                     {
@@ -450,13 +431,11 @@ namespace AkilliMikroERP.Services
         {
             if (monthlySales > 0)
             {
-                // Aylık satış varsa günlük ortalamaya göre hesapla
                 var dailySales = monthlySales / 30.0;
                 return dailySales > 0 ? (int)(currentStock / dailySales) : 90;
             }
             
-            // Kategori bazlı varsayılan değerler
-            return currentStock > 0 ? Math.Min(currentStock * 2, 90) : 90; // Maksimum 90 gün
+            return currentStock > 0 ? Math.Min(currentStock * 2, 90) : 90; 
         }
     }
 }

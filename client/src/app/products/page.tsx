@@ -41,7 +41,6 @@ export default function ProductsPage() {
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [modalMounted, setModalMounted] = useState(false);
 
-  // Modal için ayrı mounted state
   useEffect(() => {
     if (showAddModal || editingProduct) {
       setModalMounted(true);
@@ -50,12 +49,10 @@ export default function ProductsPage() {
     }
   }, [showAddModal, editingProduct]);
 
-  // Hydration için mounted state
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Ürünleri çek
   useEffect(() => {
     if (!mounted) return;
 
@@ -95,7 +92,6 @@ export default function ProductsPage() {
     fetchProducts();
   }, [mounted]);
 
-  // Kategorileri çek
   useEffect(() => {
     if (!mounted) return;
 
@@ -133,7 +129,6 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // AI ile ürün açıklaması oluştur
   const generateProductDescription = async (
     productName: string,
     category: string
@@ -179,7 +174,6 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
 
   const handleAddProduct = async (productData: any) => {
     try {
-      // Kategori ID'sini bul
       const category = categories.find(cat => cat.name === productData.category);
       if (!category) {
         alert("Kategori bulunamadı!");
@@ -191,7 +185,7 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
         sku: productData.sku,
         categoryId: category.id,
         priceSale: productData.price,
-        pricePurchase: productData.purchasePrice || productData.price * 0.7, // Alış fiyatı varsa kullan, yoksa %70
+        pricePurchase: productData.purchasePrice || productData.price * 0.7, 
         stockQuantity: productData.stock,
         stockCritical: productData.stockCritical,
         unit: "adet",
@@ -220,7 +214,6 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
 
       const createdProduct = await response.json();
       
-      // Yeni ürünü listeye ekle
       const newProduct: Product = {
         id: createdProduct.id,
         name: createdProduct.name,
@@ -246,7 +239,6 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
 
   const handleEditProduct = async (productData: any) => {
     try {
-      // Kategori ID'sini bul
       const category = categories.find(cat => cat.name === productData.category);
       if (!category) {
         alert("Kategori bulunamadı!");
@@ -259,7 +251,7 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
         sku: productData.sku,
         categoryId: category.id,
         priceSale: productData.price,
-        pricePurchase: productData.purchasePrice || productData.price * 0.7, // Alış fiyatı varsa kullan, yoksa %70
+        pricePurchase: productData.purchasePrice || productData.price * 0.7, 
         stockQuantity: productData.stock,
         stockCritical: productData.stockCritical,
         unit: "adet",
@@ -286,7 +278,6 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
         throw new Error(`API hatası: ${response.status} ${response.statusText}`);
       }
 
-      // Güncellenmiş ürünü listeye ekle
       const updatedProduct: Product = {
         id: productData.id,
         name: productData.name,
@@ -341,7 +332,6 @@ Lütfen şu özellikleri içeren bir açıklama yaz:
   };
 
 
-  // Hydration sırasında loading göster
   if (!mounted) {
     return (
       <div className="flex items-center justify-center min-h-screen">

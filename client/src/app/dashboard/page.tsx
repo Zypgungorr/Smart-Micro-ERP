@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { FileText, Target, DollarSign, Users, TrendingUp, Package, CheckCircle, XCircle } from "lucide-react";
 import AppWrapper from "@/components/AppWrapper";
+import StockAlertWidget from "@/components/StockAlertComponents/StockAlertWidget";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/context/AuthContext";
 
@@ -37,23 +38,18 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Faturaları çek
         const invoicesResponse = await fetch("http://localhost:5088/api/invoice");
         const invoices = await invoicesResponse.json();
 
-        // Siparişleri çek
         const ordersResponse = await fetch("http://localhost:5088/api/orders");
         const orders = await ordersResponse.json();
 
-        // Müşterileri çek
         const customersResponse = await fetch("http://localhost:5088/api/customer");
         const customers = await customersResponse.json();
 
-        // Ürünleri çek
         const productsResponse = await fetch("http://localhost:5088/api/products");
         const products = await productsResponse.json();
 
-        // İstatistikleri hesapla
         const totalRevenue = invoices
           .filter((inv: any) => inv.status.toLowerCase() === "ödendi")
           .reduce((sum: number, inv: any) => sum + inv.totalAmount, 0);
@@ -111,6 +107,11 @@ export default function DashboardPage() {
           <p className="text-blue-100">
             Akıllı Mikro ERP sisteminizin genel durumu
           </p>
+        </div>
+
+        {/* Stok Uyarıları */}
+        <div className="grid grid-cols-1 gap-6">
+          <StockAlertWidget showCriticalOnly={false} maxAlerts={5} />
         </div>
 
         {/* Özet Kartları */}
@@ -294,7 +295,6 @@ export default function DashboardPage() {
   );
 }
 
-// Özet Kart Bileşeni
 function SummaryCard({
   title,
   value,

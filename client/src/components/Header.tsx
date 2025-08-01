@@ -52,8 +52,8 @@ export default function Header() {
             className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="Türkçe">🇹🇷 Türkçe</option>
-            <option value="English">🇺🇸 English</option>
-            <option value="Deutsch">🇩🇪 Deutsch</option>
+            {/* <option value="English">🇺🇸 English</option>
+            <option value="Deutsch">🇩🇪 Deutsch</option> */}
           </select>
           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
@@ -66,8 +66,8 @@ export default function Header() {
             className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="₺ (Türk Lirası)">₺ (Türk Lirası)</option>
-            <option value="$ (US Dollar)">💵 $ (US Dollar)</option>
-            <option value="€ (Euro)">€ (Euro)</option>
+            {/* <option value="$ (US Dollar)">💵 $ (US Dollar)</option>
+            <option value="€ (Euro)">€ (Euro)</option> */}
           </select>
           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
